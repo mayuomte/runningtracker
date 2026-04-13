@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Run Rewards</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f2f2f7; --surface-card: #ffffff; --surface-elevated: #e5e5ea;
+            --text: #1c1c1e; --text-secondary: #8e8e93; --accent: #007aff;
+            --border: rgba(0,0,0,0.06); --radius: 16px;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #000000; --surface-card: #1c1c1e; --surface-elevated: #2c2c2e;
+                --text: #f5f5f7; --text-secondary: #8e8e93; --accent: #0a84ff;
+                --border: rgba(255,255,255,0.08);
+            }
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background: var(--bg); 
+            font-family: 'DM Sans', -apple-system, sans-serif; 
+            color: var(--text);
+            line-height: 1.4;
+        }
+        .container { max-width: 480px; margin: 0 auto; padding: 0 12px 100px; }
+        
+        /* Elements from your JSX */
+        .card { 
+            background: var(--surface-card); border-radius: var(--radius); 
+            padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 12px;
+        }
+        .header { padding: 24px 0 12px; }
+        .title { fontSize: 28px; fontWeight: 800; letterSpacing: "-0.04em"; }
+        
+        .balance-display { font-size: 42px; font-weight: 800; }
+        .stats-row { display: flex; background: var(--surface-card); border-radius: var(--radius); overflow: hidden; }
+        .stat-pill { flex: 1; text-align: center; padding: 12px 0; }
+        
+        .tab-bar { 
+            display: flex; gap: 4px; padding: 4px; background: var(--surface-elevated); 
+            border-radius: 14px; margin-bottom: 16px; position: sticky; top: 10px; z-index: 10;
+        }
+        .tab-btn { 
+            flex: 1; padding: 10px; border: none; border-radius: 11px; 
+            background: transparent; color: var(--text-secondary); font-weight: 600; 
+        }
+        .tab-btn.active { background: var(--surface-card); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+
+        .primary-btn {
+            width: 100%; padding: 16px; border: none; border-radius: 14px;
+            background: var(--accent); color: white; font-weight: 700; font-size: 16px; margin-top: 12px;
+        }
+        .upload-area {
+            width: 100%; padding: 30px; border: 2px dashed var(--border);
+            border-radius: 16px; background: var(--surface-elevated); text-align: center;
+        }
+        
+        /* Utility */
+        .hidden { display: none !important; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="flex-between">
+                <div>
+                    <h1 style="font-size: 28px; font-weight: 800;">Run Rewards</h1>
+                    <p style="color: var(--text-secondary); font-size: 14px;">Every kilometre counts</p>
+                </div>
+                <button onclick="app.resetData()" style="background: var(--surface-elevated); border:none; padding: 8px 12px; border-radius: 8px; font-size: 12px; color: var(--text-secondary);">Reset</button>
+            </div>
+            
+            <div class="card" style="margin-top: 16px;">
+                <p style="text-transform: uppercase; font-size: 11px; font-weight: 700; color: var(--text-secondary);">Available Balance</p>
+                <div class="balance-display" id="balance">0<span style="font-size: 18px; color: var(--text-secondary); margin-left: 4px;">pts</span></div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-pill"><div>🏃</div><b id="stat-runs">0</b><p style="font-size: 10px;">Runs</p></div>
+                <div class="stat-pill"><div>📏</div><b id="stat-km">0.0</b><p style="font-size: 10px;">Total km</p></div>
+                <div class="stat-pill"><div>🔥</div><b id="stat-streak">Wk 1</b><p style="font-size: 10px;">Streak</p></div>
+            </div>
+        </div>
+
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="app.setTab('log')">🏃 Log</button>
+            <button class="tab-btn" onclick="app.setTab('shop')">🎁 Shop</button>
+            <button class="tab-btn" onclick="app.setTab('history')">📋 History</button>
+        </div>
+
+        <div id="tab-log">
+            <div class="card">
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <div style="font-size: 32px;">📸</div>
+                    <p style="font-weight: 700;">Upload Screenshot</p>
+                    <p style="font-size: 12px; color: var(--text-secondary);">Nike, Strava, or similar</p>
+                </div>
+                <input type="file" id="fileInput" class="hidden" accept="image/*">
+                
+                <div style="text-align: center; margin: 16px 0; color: var(--text-secondary); font-size: 12px;">OR ENTER MANUALLY</div>
+                
+                <div style="position: relative;">
+                    <input type="number" id="manualDist" placeholder="0.0" style="width: 100%; padding: 14px; font-size: 24px; font-weight: 700; border: none; background: var(--surface-elevated); border-radius: 12px;">
+                    <span style="position: absolute; right: 15px; top: 18px; font-weight: 600; color: var(--text-secondary);">km</span>
+                </div>
+
+                <button class="primary-btn" onclick="app.manualLog()">Log Run</button>
+            </div>
+        </div>
+
+        <div id="tab-shop" class="hidden"></div>
+
+        <div id="tab-history" class="hidden"></div>
+    </div>
+
+    <script>
+        // Data logic converted from your JSX
+        const REWARDS = [
+            { tier: "Bronze", cost: 50, emoji: "🥉", color: "#cd7f32" },
+            { tier: "Silver", cost: 120, emoji: "🥈", color: "#a8a8a8" },
+            { tier: "Gold", cost: 300, emoji: "🥇", color: "#f0c548" },
+            { tier: "Platinum", cost: 600, emoji: "💎", color: "#7ec8e3" },
+            { tier: "Diamond", cost: 1200, emoji: "✨", color: "#c084fc" }
+        ];
+
+        const app = {
+            data: { runs: [], redeemed: [] },
+            
+            init() {
+                const saved = localStorage.getItem('run-rewards-data');
+                if (saved) this.data = JSON.parse(saved);
+                this.updateUI();
+                
+                // iPad specific: handle file uploads for screenshots
+                document.getElementById('fileInput').onchange = (e) => this.handleFile(e);
+            },
+
+            save() {
+                localStorage.setItem('run-rewards-data', JSON.stringify(this.data));
+                this.updateUI();
+            },
+
+            calculatePoints(km) {
+                // Implementing the logic from your JSX
+                let base = Math.round(km * 10);
+                let milestone = 0;
+                if (km >= 5) milestone += 15;
+                if (km >= 7.5) milestone += 25;
+                if (km >= 10) milestone += 40;
+                return base + milestone;
+            },
+
+            manualLog() {
+                const dist = parseFloat(document.getElementById('manualDist').value);
+                if (!dist) return;
+                
+                const run = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    distance: dist,
+                    points: this.calculatePoints(dist)
+                };
+                
+                this.data.runs.unshift(run);
+                document.getElementById('manualDist').value = '';
+                this.save();
+                alert(`Logged! +${run.points} points`);
+            },
+
+            setTab(tabId) {
+                ['log', 'shop', 'history'].forEach(id => {
+                    document.getElementById(`tab-${id}`).classList.add('hidden');
+                });
+                document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+                
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+
+                if (tabId === 'shop') this.renderShop();
+                if (tabId === 'history') this.renderHistory();
+            },
+
+            updateUI() {
+                const totalEarned = this.data.runs.reduce((s, r) => s + r.points, 0);
+                const totalSpent = this.data.redeemed.reduce((s, r) => s + r.cost, 0);
+                const balance = totalEarned - totalSpent;
+                const totalKm = this.data.runs.reduce((s, r) => s + r.distance, 0);
+
+                document.getElementById('balance').innerHTML = `${balance}<span style="font-size: 18px; color: var(--text-secondary); margin-left: 4px;">pts</span>`;
+                document.getElementById('stat-runs').innerText = this.data.runs.length;
+                document.getElementById('stat-km').innerText = totalKm.toFixed(1);
+            },
+
+            renderShop() {
+                const container = document.getElementById('tab-shop');
+                const totalEarned = this.data.runs.reduce((s, r) => s + r.points, 0);
+                const totalSpent = this.data.redeemed.reduce((s, r) => s + r.cost, 0);
+                const balance = totalEarned - totalSpent;
+
+                container.innerHTML = REWARDS.map(r => `
+                    <div class="card flex-between">
+                        <div>
+                            <span style="font-size: 24px;">${r.emoji}</span>
+                            <b style="margin-left: 8px;">${r.tier}</b>
+                        </div>
+                        <button 
+                            onclick="app.redeem(${r.cost}, '${r.tier}')" 
+                            style="background: ${balance >= r.cost ? 'var(--accent)' : 'var(--surface-elevated)'}; border: none; padding: 8px 16px; border-radius: 8px; color: ${balance >= r.cost ? 'white' : 'var(--text-secondary)'};"
+                            ${balance < r.cost ? 'disabled' : ''}>
+                            ${r.cost} pts
+                        </button>
+                    </div>
+                `).join('');
+            },
+
+            redeem(cost, tier) {
+                this.data.redeemed.unshift({ cost, tier, date: new Date().toISOString() });
+                this.save();
+                this.renderShop();
+                alert(`Redeemed ${tier}!`);
+            },
+
+            renderHistory() {
+                const container = document.getElementById('tab-history');
+                container.innerHTML = this.data.runs.map(r => `
+                    <div class="card flex-between" style="padding: 12px 18px;">
+                        <div>
+                            <b>${r.distance} km</b><br>
+                            <small style="color: var(--text-secondary)">${new Date(r.date).toLocaleDateString()}</small>
+                        </div>
+                        <b style="color: var(--accent)">+${r.points}</b>
+                    </div>
+                `).join('') || '<p style="text-align:center; padding: 20px;">No runs yet!</p>';
+            },
+
+            resetData() {
+                if(confirm("Clear all data?")) {
+                    this.data = { runs: [], redeemed: [] };
+                    this.save();
+                }
+            }
+        };
+
+        app.init();
+    </script>
+</body>
+</html>
