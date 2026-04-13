@@ -1,127 +1,1023 @@
-<style>
-    .want-item {
-        background: var(--surface-card);
-        border-radius: 12px;
-        padding: 12px;
-        margin-bottom: 8px;
-        border-left: 4px solid var(--accent);
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-    .want-link {
-        color: var(--accent);
-        text-decoration: none;
-        font-size: 13px;
-        word-break: break-all;
-        font-weight: 500;
-    }
-    .paste-box {
-        width: 100%;
-        padding: 12px;
-        border: 2px dashed var(--border);
-        border-radius: 12px;
-        background: var(--surface-elevated);
-        font-family: inherit;
-        margin-bottom: 12px;
-        color: var(--text);
-    }
-</style>
+<!DOCTYPE html>
+<html lang="en">
 
-<div id="tab-shop" class="hidden">
-    <div class="section-label">Redeem Rewards</div>
-    <div id="reward-list"></div>
-
-    <div class="section-label" style="margin-top: 24px;">Want List</div>
-    <div class="card">
-        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Paste a product link to save for later:</p>
-        <input type="text" id="wantUrlInput" class="paste-box" placeholder="https://store.com/product...">
-        <button class="primary-btn" style="margin-top: 0;" onclick="app.addWant()">Save to Want List</button>
-    </div>
-    <div id="want-list"></div>
-</div>
-
-<script>
-    // Add 'wants' to your app's data object
-    const app = {
-        data: { 
-            runs: [], 
-            redeemed: [], 
-            wants: [] // New list for your products
-        },
-
-        init() {
-            const saved = localStorage.getItem('run-rewards-data');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                this.data = { ...this.data, ...parsed }; // Merge to ensure 'wants' exists
-            }
-            this.updateUI();
-            
-            // iPad paste listener
-            document.getElementById('wantUrlInput').addEventListener('paste', (e) => {
-                // Optional: Auto-trigger save on paste
-                setTimeout(() => this.addWant(), 100);
-            });
-        },
-
-        // ... Keep your existing calculatePoints, manualLog, save, updateUI, and renderShop functions ...
-
-        renderShop() {
-            // ... (Your existing reward rendering code) ...
-            this.renderWants();
-        },
-
-        addWant() {
-            const input = document.getElementById('wantUrlInput');
-            const url = input.value.trim();
-            if (!url) return;
-
-            // Basic extraction: get the domain name as a title (e.g., amazon.com)
-            let title = "Product Link";
-            try {
-                const domain = new URL(url).hostname.replace('www.', '');
-                title = `Item from ${domain}`;
-            } catch(e) { 
-                alert("Please paste a valid URL");
-                return;
-            }
-
-            const newItem = {
-                id: Date.now(),
-                url: url,
-                title: title,
-                date: new Date().toISOString()
-            };
-
-            this.data.wants.unshift(newItem);
-            input.value = '';
-            this.save();
-            this.renderWants();
-        },
-
-        renderWants() {
-            const container = document.getElementById('want-list');
-            if (!this.data.wants) this.data.wants = [];
-            
-            container.innerHTML = this.data.wants.map(item => `
-                <div class="want-item">
-                    <div class="flex-between">
-                        <span style="font-weight: 700; font-size: 14px;">${item.title}</span>
-                        <button onclick="app.deleteWant(${item.id})" style="background:none; border:none; color:var(--text-secondary); font-size:16px;">✕</button>
-                    </div>
-                    <a href="${item.url}" target="_blank" class="want-link">${item.url}</a>
-                    <small style="color: var(--text-secondary); font-size: 10px;">Added ${new Date(item.date).toLocaleDateString()}</small>
-                </div>
-            `).join('');
-        },
-
-        deleteWant(id) {
-            this.data.wants = this.data.wants.filter(w => w.id !== id);
-            this.save();
-            this.renderWants();
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Run Rewards</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f4f5f7;
+            /* Softer, warmer background */
+            --card: #ffffff;
+            --elevated: #eef0f5;
+            /* Slightly blue-tinted elevation */
+            --text: #111827;
+            /* Deeper, softer black */
+            --sub: #6b7280;
+            /* Modern gray */
+            --accent: #6366f1;
+            /* Vibrant Indigo */
+            --green: #10b981;
+            /* Fresh Mint Green */
+            --red: #ef4444;
+            /* Punchier red */
+            --orange: #f59e0b;
+            /* Warmer orange */
+            --border: rgba(99, 102, 241, 0.08);
+            /* Hint of indigo in borders */
+            --R: 20px;
+            /* Slightly rounder, friendlier cards */
         }
-    };
 
-    app.init();
-</script>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f1115;
+                --card: #1f222b;
+                --elevated: #2b303b;
+                --text: #f9fafb;
+                --sub: #9ca3af;
+                --accent: #818cf8;
+                /* Lighter indigo for dark mode */
+                --border: rgba(255, 255, 255, 0.05);
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #000;
+                --card: #1c1c1e;
+                --elevated: #2c2c2e;
+                --text: #f5f5f7;
+                --sub: #8e8e93;
+                --accent: #0a84ff;
+                --border: rgba(255, 255, 255, 0.08);
+            }
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'DM Sans', -apple-system, sans-serif;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        input:focus,
+        button:focus {
+            outline: none;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        a {
+            color: var(--accent);
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 8px 40px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--R);
+            padding: 18px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            margin-bottom: 8px;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            letter-spacing: -0.02em;
+        }
+
+        /* Tab bar */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: var(--elevated);
+            border-radius: 14px;
+            margin-bottom: 8px;
+            position: sticky;
+            top: 10px;
+            z-index: 10;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px 6px;
+            border: none;
+            border-radius: 11px;
+            background: transparent;
+            color: var(--sub);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .tab.on {
+            background: var(--card);
+            color: var(--text);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Inputs */
+        .big-input {
+            width: 100%;
+            padding: 14px 48px 14px 16px;
+            font-size: 28px;
+            font-weight: 700;
+            font-family: inherit;
+            background: var(--elevated);
+            border: none;
+            border-radius: 14px;
+            color: var(--text);
+            letter-spacing: -0.03em;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 15px;
+            font-family: inherit;
+            background: var(--elevated);
+            border: none;
+            border-radius: 12px;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .input-unit {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--sub);
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.2s;
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-green {
+            background: var(--green);
+            color: #fff;
+        }
+
+        .btn-flat {
+            background: var(--elevated);
+            color: var(--sub);
+        }
+
+        .btn-sm {
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            flex: 1;
+            transition: all 0.2s;
+        }
+
+        .btn:disabled,
+        .btn-sm:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        .toggle {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+
+        /* Upload */
+        .upload-area {
+            width: 100%;
+            padding: 28px 16px;
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            background: var(--elevated);
+            cursor: pointer;
+            font-family: inherit;
+            text-align: center;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--sub);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--sub);
+            padding: 16px 4px 8px;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 5px;
+            background: var(--elevated);
+            border-radius: 100px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 100px;
+            transition: width 0.4s ease;
+        }
+
+        .history-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: var(--card);
+            border-radius: 14px;
+            margin-bottom: 6px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+
+        .stats-row {
+            display: flex;
+            background: var(--card);
+            border-radius: var(--R);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            padding: 14px 4px;
+        }
+
+        .stat-val {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--sub);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .streak-banner {
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: linear-gradient(135deg, #ff9500, #ff6b00);
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+        }
+
+        .preview-box {
+            background: var(--elevated);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-top: 12px;
+        }
+
+        .preview-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 14px;
+        }
+
+        .preview-total {
+            border-top: 1px solid var(--border);
+            margin-top: 8px;
+            padding-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+        }
+
+        .scan-card {
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.08), rgba(0, 122, 255, 0.03));
+            border: 1px solid rgba(0, 122, 255, 0.15);
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin-bottom: 12px;
+        }
+
+        .scan-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .scan-stat {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 10px 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+
+        .lookup-card {
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.08), rgba(52, 199, 89, 0.02));
+            border: 1px solid rgba(52, 199, 89, 0.15);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+        }
+
+        .wishlist-item {
+            border-left: 4px solid var(--accent);
+        }
+
+        .rule-text {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .rule-warn {
+            margin-top: 12px;
+            color: var(--red);
+            font-weight: 600;
+            font-size: 13px;
+            background: rgba(224, 82, 82, 0.08);
+            padding: 10px 12px;
+            border-radius: 10px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.82);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 999;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+            animation: toastPop 0.35s cubic-bezier(.34, 1.56, .64, 1);
+            pointer-events: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes toastPop {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(16px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0) scale(1);
+            }
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.15);
+            }
+        }
+
+        .fade-in {
+            animation: fadeSlide 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="app">
+        <!-- Header -->
+        <div style="padding-top:20px; margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <div>
+                    <h1 style="font-size:28px; font-weight:800; letter-spacing:-0.04em; line-height:1.1;">Run Rewards
+                    </h1>
+                    <p style="font-size:14px; color:var(--sub); font-weight:500; margin-top:2px;">Every kilometre counts
+                    </p>
+                </div>
+                <button onclick="R.reset()"
+                    style="background: transparent; color: var(--sub); border: none; font-size: 13px; font-weight: 600; cursor: pointer; padding: 6px 12px; border-radius: 8px; transition: background 0.2s;"
+                    onmouseover="this.style.background='var(--elevated)'"
+                    onmouseout="this.style.background='transparent'">Reset</button>
+            </div>
+            <div class="card" style="margin-bottom:10px;">
+                <div
+                    style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--sub); margin-bottom:4px;">
+                    Available Balance</div>
+                <div id="balance-display"
+                    style="font-size:42px; font-weight:800; letter-spacing:-0.04em; line-height:1.1;">
+                    0<span style="font-size:18px; font-weight:600; color:var(--sub); margin-left:4px;">pts</span>
+                </div>
+            </div>
+            <div class="stats-row" id="stats-row"></div>
+            <div id="streak-banner"></div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab on" data-tab="log" onclick="R.setTab('log')">🏃 Log</button>
+            <button class="tab" data-tab="shop" onclick="R.setTab('shop')">🎁 Shop</button>
+            <button class="tab" data-tab="history" onclick="R.setTab('history')">📋 History</button>
+            <button class="tab" data-tab="rules" onclick="R.setTab('rules')">📖 Rules</button>
+        </div>
+
+        <!-- LOG TAB -->
+        <div id="tab-log">
+            <div class="card" id="log-card"></div>
+        </div>
+
+        <!-- SHOP TAB -->
+        <div id="tab-shop" class="hidden"></div>
+
+        <!-- HISTORY TAB -->
+        <div id="tab-history" class="hidden"></div>
+
+        <!-- RULES TAB -->
+        <div id="tab-rules" class="hidden"></div>
+    </div>
+
+    <div id="toast-el" class="toast hidden"></div>
+    <input type="file" id="file-input" accept="image/*" style="display:none">
+
+    <script>
+        // ─── Point System Logic ───
+        const STREAK_BONUS = [0, 0, 5, 10, 15, 20];
+        function streakBonus(wk) { return wk >= 5 ? 20 : (STREAK_BONUS[wk] || 0); }
+        function milestoneBonus(km) { let b = 0; if (km >= 5) b += 15; if (km >= 7.5) b += 25; if (km >= 10) b += 40; return b; }
+        function weekKey(date) {
+            const d = new Date(date), day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            const m = new Date(d); m.setDate(diff); return m.toISOString().slice(0, 10);
+        }
+        function calcStreakWeek(runs) {
+            if (!runs.length) return 1;
+            const wc = {}; runs.forEach(r => { const w = weekKey(r.date); wc[w] = (wc[w] || 0) + 1; });
+            const weeks = Object.keys(wc).sort().reverse();
+            let s = 0; for (const w of weeks) { if (wc[w] >= 2) s++; else break; } return Math.max(1, s);
+        }
+        function getPR(runs) { return runs.length ? Math.max(...runs.map(r => r.distance)) : 0; }
+        function calcPoints(dist, tough, pr, sw) {
+            const base = Math.round(dist * 10), ms = milestoneBonus(dist), nt = dist > pr ? 10 : 0, sb = streakBonus(sw);
+            const sub = base + ms + nt + sb, mult = tough ? 1.2 : 1, total = Math.round(sub * mult);
+            return { base, milestone: ms, newTerritory: nt, streakBonus: sb, multiplier: mult, total };
+        }
+        function ptsForPrice(yen) { return Math.ceil(yen / 100) * 10; }
+        function fmtDate(d) { return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" }); }
+
+        // ─── Claude API helpers ───
+        async function apiParseScreenshot(b64, mime) {
+            try {
+                const res = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-20250514", max_tokens: 1000,
+                        messages: [{
+                            role: "user", content: [
+                                { type: "image", source: { type: "base64", media_type: mime, data: b64 } },
+                                {
+                                    type: "text", text: `Analyze this running app screenshot (Nike Run Club, Strava, etc).
+Return ONLY JSON, no markdown: {"distance_km":<number in km>,"duration":"<string>","avg_pace":"<or null>","calories":<or null>,"source":"<app name>"}\nConvert miles to km if needed. If unreadable: {"error":"Could not read"}`}
+                            ]
+                        }]
+                    })
+                });
+                const d = await res.json();
+                const txt = d.content?.map(b => b.text || "").join("") || "";
+                return JSON.parse(txt.replace(/```json|```/g, "").trim());
+            } catch (e) { return { error: "Failed to analyze" }; }
+        }
+
+        async function apiLookupPrice(url) {
+            try {
+                const res = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-20250514", max_tokens: 1000,
+                        tools: [{ type: "web_search_20250305", name: "web_search" }],
+                        messages: [{ role: "user", content: `Find the price and product name for: ${url}\n\nReturn ONLY JSON, no markdown:\n{"product_name":"<name>","price_jpy":<number in JPY>,"price_display":"<like ¥12,500>","store":"<store>","confidence":"high or low"}\nConvert USD to JPY at ~155. If not found: {"error":"Not found","product_name":"<best guess>"}` }]
+                    })
+                });
+                const d = await res.json();
+                const txt = d.content?.filter(b => b.type === "text").map(b => b.text).join("") || "";
+                return JSON.parse(txt.replace(/```json|```/g, "").trim());
+            } catch (e) { return { error: "Lookup failed" }; }
+        }
+
+        // ─── App State ───
+        const R = {
+            data: { runs: [], redeemed: [], wishlist: [], prizes: [] },
+            tab: "log",
+            scanning: false,
+            scanData: null,
+            isTough: false,
+            lookingUp: false,
+            lookupResult: null,
+            toastTimer: null,
+
+            // Storage
+            async load() {
+                try {
+                    const s = localStorage.getItem("runrewards-v5");
+                    if (s) this.data = JSON.parse(s);
+                } catch (e) { }
+                this.render();
+            },
+            save() { localStorage.setItem("runrewards-v5", JSON.stringify(this.data)); },
+
+            // Derived
+            get balance() { return this.data.runs.reduce((s, r) => s + r.points, 0) - this.data.redeemed.reduce((s, r) => s + r.cost, 0); },
+            get pr() { return getPR(this.data.runs); },
+            get streakWeek() { return calcStreakWeek(this.data.runs); },
+            get totalKm() { return this.data.runs.reduce((s, r) => s + r.distance, 0); },
+
+            // Toast
+            toast(msg) {
+                const el = document.getElementById("toast-el");
+                el.textContent = msg; el.classList.remove("hidden");
+                clearTimeout(this.toastTimer);
+                this.toastTimer = setTimeout(() => el.classList.add("hidden"), 2400);
+            },
+
+            // Tabs
+            setTab(id) {
+                this.tab = id;
+                ["log", "shop", "history", "rules"].forEach(t => {
+                    document.getElementById("tab-" + t).classList.toggle("hidden", t !== id);
+                    document.querySelector(`[data-tab="${t}"]`).classList.toggle("on", t === id);
+                });
+                this.render();
+            },
+
+            // ─── Run logging ───
+            logRun(dist, tough, extra = {}) {
+                if (dist <= 0 || dist > 200) return;
+                const pts = calcPoints(dist, tough, this.pr, this.streakWeek);
+                this.data.runs.unshift({
+                    id: Date.now(), date: new Date().toISOString(), distance: dist,
+                    points: pts.total, isTough: tough, isNewRecord: dist > this.pr, breakdown: pts, ...extra
+                });
+                this.isTough = false; this.scanData = null; this.scanning = false;
+                this.save(); this.render();
+                this.toast(`🎉 +${pts.total} points earned!`);
+            },
+
+            manualLog() {
+                const el = document.getElementById("manual-dist");
+                const d = parseFloat(el?.value); if (!d || d <= 0) return;
+                this.logRun(d, this.isTough);
+                el.value = "";
+            },
+
+            toggleTough() {
+                this.isTough = !this.isTough;
+                this.render();
+            },
+
+            // Screenshot
+            async handleFile(file) {
+                if (!file) return;
+                this.scanning = true; this.scanData = null; this.render();
+                try {
+                    const b64 = await new Promise((res, rej) => {
+                        const r = new FileReader(); r.onload = () => res(r.result.split(",")[1]); r.onerror = rej; r.readAsDataURL(file);
+                    });
+                    const result = await apiParseScreenshot(b64, file.type || "image/jpeg");
+                    if (result.error) { this.toast("⚠️ " + result.error); this.scanning = false; this.render(); return; }
+                    if (!result.distance_km || result.distance_km <= 0) { this.toast("⚠️ No distance found"); this.scanning = false; this.render(); return; }
+                    result.distance_km = Math.round(result.distance_km * 100) / 100;
+                    this.scanData = result;
+                } catch (e) { this.toast("⚠️ Failed to read screenshot"); }
+                this.scanning = false; this.render();
+            },
+
+            confirmScan() {
+                if (!this.scanData) return;
+                const s = this.scanData, extra = {};
+                if (s.duration) extra.duration = s.duration;
+                if (s.avg_pace) extra.avgPace = s.avg_pace;
+                if (s.calories) extra.calories = s.calories;
+                if (s.source) extra.source = s.source;
+                this.logRun(s.distance_km, this.isTough, extra);
+            },
+            cancelScan() { this.scanData = null; this.scanning = false; this.render(); },
+
+            // ─── Wishlist ───
+            async handleLinkPaste() {
+                const url = document.getElementById("link-input")?.value || "";
+                if (url.length < 10 || (!url.match(/^https?:\/\//i) && !url.includes("."))) return;
+                this.lookingUp = true; this.lookupResult = null; this.render();
+                const result = await apiLookupPrice(url);
+                this.lookupResult = result;
+                if (result.price_jpy) { const el = document.getElementById("price-input"); if (el) el.value = result.price_jpy; }
+                this.lookingUp = false; this.render();
+            },
+
+            addToWishlist() {
+                const price = parseInt(document.getElementById("price-input")?.value);
+                if (!price || price <= 0) { this.toast("⚠️ Enter a valid price"); return; }
+                const linkEl = document.getElementById("link-input");
+                const name = this.lookupResult?.product_name || linkEl?.value || "Custom item";
+                const store = this.lookupResult?.store || "";
+                const url = linkEl?.value?.match(/^https?:\/\//) ? linkEl.value : "";
+                this.data.wishlist.unshift({ id: Date.now(), name, price, pointCost: ptsForPrice(price), url, store, date: new Date().toISOString() });
+                if (linkEl) linkEl.value = "";
+                const priceEl = document.getElementById("price-input"); if (priceEl) priceEl.value = "";
+                this.lookupResult = null;
+                this.save(); this.render();
+                this.toast("📌 Added to wishlist!");
+            },
+
+            moveToPrizes(id) {
+                const item = this.data.wishlist.find(w => w.id === id);
+                if (!item) return;
+                this.data.prizes.unshift({ ...item, movedAt: new Date().toISOString() });
+                this.data.wishlist = this.data.wishlist.filter(w => w.id !== id);
+                this.save(); this.render();
+                this.toast("🎁 Moved to prizes!");
+            },
+
+            redeemPrize(id) {
+                const item = this.data.prizes.find(p => p.id === id);
+                if (!item || this.balance < item.pointCost) return;
+                this.data.redeemed.unshift({ cost: item.pointCost, name: item.name, date: new Date().toISOString(), id: Date.now() });
+                this.save(); this.render();
+                this.toast(`🎉 Redeemed: ${item.name}!`);
+            },
+
+            deleteWishlist(id) { this.data.wishlist = this.data.wishlist.filter(w => w.id !== id); this.save(); this.render(); },
+            deletePrize(id) { this.data.prizes = this.data.prizes.filter(p => p.id !== id); this.save(); this.render(); },
+            deleteRun(id) { this.data.runs = this.data.runs.filter(r => r.id !== id); this.save(); this.render(); this.toast("Run removed"); },
+
+            reset() {
+                if (!confirm("Reset all data? This cannot be undone.")) return;
+                this.data = { runs: [], redeemed: [], wishlist: [], prizes: [] };
+                this.save(); this.render(); this.toast("All data cleared");
+            },
+
+            // ─── RENDER ───
+            render() {
+                const bal = this.balance, pr = this.pr, sw = this.streakWeek, tk = this.totalKm;
+
+                // Balance
+                document.getElementById("balance-display").innerHTML = `${bal}<span style="font-size:18px;font-weight:600;color:var(--sub);margin-left:4px">pts</span>`;
+
+                // Stats
+                document.getElementById("stats-row").innerHTML = [
+                    ["🏃", this.data.runs.length, "Runs"],
+                    ["📏", tk.toFixed(1), "Total km"],
+                    ["🔥", `Wk ${sw}`, "Streak"],
+                    ["🏅", pr > 0 ? `${pr}km` : "—", "PR"],
+                ].map(([e, v, l]) => `<div class="stat"><span style="font-size:20px;margin-bottom:4px">${e}</span><span class="stat-val">${v}</span><span class="stat-label">${l}</span></div>`).join("");
+
+                // Streak banner
+                document.getElementById("streak-banner").innerHTML = sw >= 2
+                    ? `<div class="streak-banner">🔥 Week ${sw} streak — +${streakBonus(sw)} bonus pts per run!</div>` : "";
+
+                // Render active tab
+                if (this.tab === "log") this.renderLog();
+                if (this.tab === "shop") this.renderShop();
+                if (this.tab === "history") this.renderHistory();
+                if (this.tab === "rules") this.renderRules();
+            },
+
+            renderLog() {
+                const el = document.getElementById("log-card");
+                if (this.scanning) {
+                    el.innerHTML = `<div style="text-align:center;padding:40px 0" class="fade-in">
+                <div style="font-size:40px;margin-bottom:12px;animation:pulse 1.2s ease-in-out infinite">📸</div>
+                <div style="font-weight:700;font-size:16px">Analyzing screenshot...</div>
+                <div style="font-size:13px;color:var(--sub)">Reading your run data with AI</div>
+            </div>`;
+                    return;
+                }
+
+                if (this.scanData) {
+                    const s = this.scanData;
+                    const prev = calcPoints(s.distance_km, this.isTough, this.pr, this.streakWeek);
+                    el.innerHTML = `<div class="fade-in">
+                <div class="scan-card">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+                        <span style="font-size:20px">📸</span>
+                        <div><div style="font-weight:700;font-size:15px">Screenshot Detected</div>
+                        <div style="font-size:12px;color:var(--sub)">from ${s.source || "running app"}</div></div>
+                    </div>
+                    <div class="scan-grid">
+                        ${[["📏", "Distance", `${s.distance_km?.toFixed(2)} km`], ["⏱️", "Duration", s.duration || "—"], ["🏃", "Avg Pace", s.avg_pace || "—"], ["🔥", "Calories", s.calories ? `${s.calories} kcal` : "—"]]
+                            .map(([i, l, v]) => `<div class="scan-stat"><div style="font-size:11px;color:var(--sub);font-weight:500;margin-bottom:2px">${i} ${l}</div><div style="font-size:16px;font-weight:700">${v}</div></div>`).join("")}
+                    </div>
+                </div>
+                <button class="toggle" onclick="R.toggleTough()" style="background:${this.isTough ? "var(--accent)" : "var(--elevated)"};color:${this.isTough ? "#fff" : "var(--sub)"}">
+                    💪 Tough conditions ${this.isTough ? "(1.2× active)" : ""}
+                </button>
+                ${this._previewHTML(prev)}
+                <div style="display:flex;gap:8px;margin-top:14px">
+                    <button class="btn btn-flat" style="flex:1;padding:14px;font-size:15px" onclick="R.cancelScan()">Cancel</button>
+                    <button class="btn btn-accent" style="flex:2;padding:14px;font-size:15px" onclick="R.confirmScan()">Log This Run</button>
+                </div>
+            </div>`;
+                    return;
+                }
+
+                // Default: upload + manual
+                const dist = parseFloat(document.getElementById("manual-dist")?.value) || 0;
+                const prev = dist > 0 ? calcPoints(dist, this.isTough, this.pr, this.streakWeek) : null;
+
+                el.innerHTML = `
+            <button class="upload-area" onclick="document.getElementById('file-input').click()">
+                <div style="font-size:36px;margin-bottom:8px">📸</div>
+                <div style="font-weight:700;font-size:16px;color:var(--text);margin-bottom:4px">Upload Screenshot</div>
+                <div style="font-size:13px;color:var(--sub)">Nike Run Club, Strava, or any running app</div>
+            </button>
+            <div class="divider"><div class="divider-line"></div><span class="divider-text">or enter manually</span><div class="divider-line"></div></div>
+            <div style="position:relative">
+                <input type="number" id="manual-dist" placeholder="0.0" step="0.1" min="0" class="big-input" oninput="R.render()" onkeydown="if(event.key==='Enter')R.manualLog()">
+                <span class="input-unit">km</span>
+            </div>
+            <button class="toggle" onclick="R.toggleTough()" style="background:${this.isTough ? "var(--accent)" : "var(--elevated)"};color:${this.isTough ? "#fff" : "var(--sub)"}">
+                💪 Tough conditions ${this.isTough ? "(1.2× active)" : ""}
+            </button>
+            ${prev ? this._previewHTML(prev) : ""}
+            <button class="btn btn-accent" style="margin-top:14px;opacity:${dist > 0 ? 1 : 0.4}" onclick="R.manualLog()" ${dist <= 0 ? "disabled" : ""}>Log Run</button>
+        `;
+            },
+
+            _previewHTML(p) {
+                const rows = [
+                    ["Base", p.base, true],
+                    ["Milestone", `+${p.milestone}`, p.milestone > 0],
+                    ["New Record!", `+${p.newTerritory}`, p.newTerritory > 0],
+                    ["Streak", `+${p.streakBonus}`, p.streakBonus > 0],
+                    ["Tough ×1.2", "applied", p.multiplier > 1],
+                ].filter(r => r[2]);
+                return `<div class="preview-box fade-in">
+            <div style="font-size:12px;font-weight:600;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em">Point Preview</div>
+            ${rows.map(([l, v]) => `<div class="preview-row"><span style="font-weight:500">${l}</span><span style="font-weight:600;color:var(--accent)">${v}</span></div>`).join("")}
+            <div class="preview-total"><span style="font-weight:700">Total</span><span style="font-weight:800;color:var(--accent)">${p.total} pts</span></div>
+        </div>`;
+            },
+
+            renderShop() {
+                const el = document.getElementById("tab-shop");
+                const bal = this.balance;
+                let html = "";
+
+                // Add to wishlist form
+                html += `<div class="card">
+            <div class="card-title">Add to Wishlist</div>
+            <input type="text" id="link-input" placeholder="Paste a store link or product name..." class="text-input"
+                onpaste="setTimeout(()=>R.handleLinkPaste(),50)">
+            ${this.lookingUp ? `<div style="padding:12px 0;text-align:center" class="fade-in"><div style="font-size:13px;color:var(--sub);font-weight:600">🔍 Looking up price...</div></div>` : ""}
+            ${this.lookupResult && !this.lookupResult.error ? `
+                <div class="lookup-card fade-in">
+                    <div style="font-weight:700;font-size:14px;margin-bottom:4px">✅ ${this.lookupResult.product_name}</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <span style="font-size:13px;color:var(--sub)">${this.lookupResult.store || "Online"}</span>
+                        <span style="font-weight:800;font-size:16px">${this.lookupResult.price_display}</span>
+                    </div>
+                    <div style="font-size:12px;color:var(--accent);font-weight:600;margin-top:6px">= ${ptsForPrice(this.lookupResult.price_jpy)} points to unlock</div>
+                </div>` : ""}
+            ${this.lookupResult?.error ? `<div style="font-size:13px;color:var(--sub);padding:8px 0;margin-bottom:4px">⚠️ Couldn't auto-detect price — enter manually${this.lookupResult.product_name ? ` (${this.lookupResult.product_name})` : ""}</div>` : ""}
+            <div style="position:relative">
+                <input type="number" id="price-input" placeholder="Price in ¥" class="text-input" style="padding-left:32px">
+                <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;font-weight:700;color:var(--sub)">¥</span>
+            </div>
+            <button class="btn btn-accent" onclick="R.addToWishlist()">Add to Wishlist</button>
+        </div>`;
+
+                // Active prizes
+                if (this.data.prizes.length) {
+                    html += `<div class="section-label">🎁 Active Prizes</div>`;
+                    this.data.prizes.forEach(p => {
+                        const can = bal >= p.pointCost;
+                        const prog = Math.min(100, (bal / p.pointCost) * 100);
+                        html += `<div class="card" style="margin-bottom:8px">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+                        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px;margin-bottom:2px">${p.name}</div>
+                        <div style="font-size:12px;color:var(--sub)">${p.store ? p.store + " · " : ""}¥${p.price.toLocaleString()}</div></div>
+                        <div style="text-align:right;flex-shrink:0;margin-left:12px"><div style="font-weight:800;font-size:18px">${p.pointCost}</div><div style="font-size:11px;color:var(--sub)">pts</div></div>
+                    </div>
+                    <div class="progress-track"><div class="progress-fill" style="width:${prog}%;background:${can ? "var(--green)" : "var(--accent)"}"></div></div>
+                    <div style="display:flex;gap:8px">
+                        <button class="btn-sm" style="background:var(--elevated);color:var(--sub)" onclick="R.deletePrize(${p.id})">Remove</button>
+                        <button class="btn-sm" style="flex:2;background:${can ? "var(--green)" : "var(--elevated)"};color:${can ? "#fff" : "var(--sub)"};opacity:${can ? 1 : 0.5}" onclick="R.redeemPrize(${p.id})" ${can ? "" : "disabled"}>
+                            ${can ? "🎉 Redeem!" : `Need ${p.pointCost - bal} more`}
+                        </button>
+                    </div>
+                </div>`;
+                    });
+                }
+
+                // Tier rewards
+                html += `<div class="section-label">🏆 Tier Rewards</div>`;
+                [{ t: "Bronze", c: 50, e: "🥉", x: "Fancy coffee, smoothie, snack", cl: "#cd7f32" },
+                { t: "Silver", c: 120, e: "🥈", x: "Nice meal or book/manga", cl: "#a8a8a8" },
+                { t: "Gold", c: 300, e: "🥇", x: "Movie + snacks or workout gear", cl: "#f0c548" },
+                { t: "Platinum", c: 600, e: "💎", x: "Running shoes or earbuds", cl: "#7ec8e3" },
+                { t: "Diamond", c: 1200, e: "✨", x: "Major splurge — tech or trips", cl: "#c084fc" }
+                ].forEach(r => {
+                    const prog = Math.min(100, (bal / r.c) * 100);
+                    html += `<div class="card" style="margin-bottom:8px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                    <div style="display:flex;align-items:center;gap:10px"><span style="font-size:26px">${r.e}</span>
+                    <div><div style="font-weight:700;font-size:15px">${r.t}</div><div style="font-size:12px;color:var(--sub);margin-top:2px">${r.x}</div></div></div>
+                    <div style="text-align:right;flex-shrink:0;margin-left:12px"><div style="font-weight:800;font-size:18px">${r.c}</div><div style="font-size:11px;color:var(--sub)">pts</div></div>
+                </div>
+                <div class="progress-track"><div class="progress-fill" style="width:${prog}%;background:${bal >= r.c ? "var(--accent)" : r.cl}"></div></div>
+            </div>`;
+                });
+
+                // Wishlist
+                if (this.data.wishlist.length) {
+                    html += `<div class="section-label">📌 Wishlist</div>`;
+                    this.data.wishlist.forEach(w => {
+                        html += `<div class="card wishlist-item" style="margin-bottom:8px">
+                    <div style="margin-bottom:8px"><div style="font-weight:700;font-size:14px">${w.name}</div>
+                    <div style="font-size:12px;color:var(--sub);margin-top:2px">¥${w.price.toLocaleString()} → <strong style="color:var(--accent)">${w.pointCost} pts</strong></div></div>
+                    <div style="display:flex;gap:8px">
+                        ${w.url ? `<a href="${w.url}" target="_blank" class="btn-sm" style="text-decoration:none;text-align:center;background:var(--elevated);color:var(--accent);font-size:12px">View</a>` : ""}
+                        <button class="btn-sm" style="background:var(--elevated);color:var(--red)" onclick="R.deleteWishlist(${w.id})">✕</button>
+                        <button class="btn-sm" style="flex:2;background:var(--accent);color:#fff" onclick="R.moveToPrizes(${w.id})">Move to Prizes →</button>
+                    </div>
+                </div>`;
+                    });
+                }
+                el.innerHTML = html;
+            },
+
+            renderHistory() {
+                const el = document.getElementById("tab-history");
+                let html = "";
+                if (this.data.redeemed.length) {
+                    html += `<div class="section-label">Redeemed</div>`;
+                    this.data.redeemed.forEach(r => {
+                        html += `<div class="history-row" style="border-left:3px solid var(--red)">
+                    <span style="font-size:20px">🎁</span>
+                    <div style="flex:1"><div style="font-weight:600;font-size:14px">${r.name || r.tier}</div><div style="font-size:12px;color:var(--sub)">${fmtDate(r.date)}</div></div>
+                    <span style="font-weight:700;color:var(--red);font-size:14px">−${r.cost}</span>
+                </div>`;
+                    });
+                }
+                html += `<div class="section-label">Runs</div>`;
+                if (!this.data.runs.length) html += `<div class="card" style="text-align:center;color:var(--sub);padding:32px">No runs yet. Get out there! 🏃</div>`;
+                this.data.runs.forEach(r => {
+                    const icon = r.source ? "📸" : r.isNewRecord ? "🏅" : "🏃";
+                    const bg = r.isNewRecord ? "linear-gradient(135deg,#f0c548,#e8a735)" : "var(--elevated)";
+                    html += `<div class="history-row">
+                <div style="width:40px;height:40px;border-ra<button onclick="R.reset()dius:12px;display:flex;align-items:center;justify-content:center;background:${bg};font-size:18px;flex-shrink:0">${icon}</div>
+                <div style="flex:1;min-width:0">
+                    <div style="font-weight:600;font-size:14px">${r.distance} km${r.isTough ? ` <span style="font-size:11px;color:var(--accent);margin-left:6px">💪 1.2×</span>` : ""}${r.isNewRecord ? ` <span style="font-size:11px;color:#e8a735;margin-left:6px">NEW PR</span>` : ""}</div>
+                    <div style="font-size:12px;color:var(--sub)">${fmtDate(r.date)}${r.duration ? " · " + r.duration : ""}${r.avgPace ? " · " + r.avgPace : ""}${r.source ? " · " + r.source : ""}</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                    <div style="font-weight:700;color:var(--accent);font-size:14px">+${r.points}</div>
+                    <button onclick="R.deleteRun(${r.id})" style="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;opacity:0.5">✕</button>
+                </div>
+            </div>`;
+                });
+                el.innerHTML = html;
+            },
+
+            renderRules() {
+                document.getElementById("tab-rules").innerHTML = `
+        <div class="card"><div class="card-title">1. Base Points</div>
+            <div class="rule-text"><strong>10 pts</strong> per km — your 2.5km run = 25 pts.</div>
+            <div class="rule-text" style="margin-top:8px"><strong>+10 pts</strong> "New Territory" bonus when you beat your PR.</div>
+            <div class="rule-text" style="margin-top:8px"><strong>×1.2</strong> multiplier for tough conditions (early AM, rain, long day).</div>
+        </div>
+        <div class="card"><div class="card-title">2. Milestone Bonuses</div>
+            ${[["5.0 km", "+15 pts", "= 65 total"], ["7.5 km", "+25 pts", "= 100 total"], ["10.0 km", "+40 pts", "= 140 total"]].map(([d, b, t], i) => `
+                <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;${i < 2 ? "border-bottom:1px solid var(--border)" : ""}">
+                    <span style="font-weight:600;flex:1">${d}</span><span style="color:var(--accent);font-weight:700;flex:1;text-align:center">${b}</span><span style="color:var(--sub);font-size:12px;flex:1;text-align:right">${t}</span>
+                </div>`).join("")}
+        </div>
+        <div class="card"><div class="card-title">3. Streak System</div>
+            <div class="rule-text" style="margin-bottom:10px">Run 2+ times per week to build your streak.</div>
+            ${[["Week 1", "Base only"], ["Week 2", "+5 per run"], ["Week 3", "+10 per run"], ["Week 4", "+15 per run"], ["Week 5+", "+20 per run (cap)"]].map(([w, b], i) => `
+                <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;${i < 4 ? "border-bottom:1px solid var(--border)" : ""}">
+                    <span style="font-weight:600">${w}</span><span style="color:var(--sub);font-weight:500">${b}</span>
+                </div>`).join("")}
+            <div class="rule-warn">⚠️ Fewer than 2 runs in a week → streak resets!</div>
+        </div>
+        <div class="card"><div class="card-title">4. Smart Wishlist</div>
+            <div class="rule-text">Paste any store link → AI auto-detects the price.</div>
+            <div class="rule-text" style="margin-top:4px">Conversion rate: <strong>¥100 = 10 points</strong>.</div>
+            <div class="rule-text" style="margin-top:4px">Move wishlist items to Prizes to make them redeemable.</div>
+            <div class="rule-text" style="margin-top:4px;font-weight:600">No debt — you must have the points to redeem.</div>
+        </div>`;
+            }
+        };
+
+        // Init
+        document.getElementById("file-input").addEventListener("change", e => {
+            R.handleFile(e.target.files?.[0]); e.target.value = "";
+        });
+        R.load();
+    </script>
+</body>
+
+</html>
