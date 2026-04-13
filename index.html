@@ -13,44 +13,21 @@
     <style>
         :root {
             --bg: #f4f5f7;
-            /* Softer, warmer background */
             --card: #ffffff;
             --elevated: #eef0f5;
-            /* Slightly blue-tinted elevation */
             --text: #111827;
-            /* Deeper, softer black */
             --sub: #6b7280;
-            /* Modern gray */
             --accent: #6366f1;
-            /* Vibrant Indigo */
             --green: #10b981;
-            /* Fresh Mint Green */
             --red: #ef4444;
-            /* Punchier red */
             --orange: #f59e0b;
-            /* Warmer orange */
             --border: rgba(99, 102, 241, 0.08);
-            /* Hint of indigo in borders */
             --R: 20px;
-            /* Slightly rounder, friendlier cards */
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #0f1115;
-                --card: #1f222b;
-                --elevated: #2b303b;
-                --text: #f9fafb;
-                --sub: #9ca3af;
-                --accent: #818cf8;
-                /* Lighter indigo for dark mode */
-                --border: rgba(255, 255, 255, 0.05);
-            }
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #000;
+                --bg: #000000;
                 --card: #1c1c1e;
                 --elevated: #2c2c2e;
                 --text: #f5f5f7;
@@ -80,6 +57,7 @@
             outline: none;
         }
 
+        /* Hide spin buttons for numbers */
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -164,7 +142,7 @@
         .text-input {
             width: 100%;
             padding: 12px 14px;
-            font-size: 15px;
+            font-size: 16px; /* 16px prevents auto-zoom on iOS */
             font-family: inherit;
             background: var(--elevated);
             border: none;
@@ -240,43 +218,6 @@
             font-family: inherit;
             margin-top: 10px;
             transition: all 0.2s;
-        }
-
-        /* Upload */
-        .upload-area {
-            width: 100%;
-            padding: 28px 16px;
-            border: 2px dashed var(--border);
-            border-radius: 16px;
-            background: var(--elevated);
-            cursor: pointer;
-            font-family: inherit;
-            text-align: center;
-        }
-
-        .upload-area:hover {
-            border-color: var(--accent);
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 16px 0;
-        }
-
-        .divider-line {
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-
-        .divider-text {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--sub);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
         }
 
         .section-label {
@@ -377,27 +318,6 @@
             font-size: 16px;
         }
 
-        .scan-card {
-            background: linear-gradient(135deg, rgba(0, 122, 255, 0.08), rgba(0, 122, 255, 0.03));
-            border: 1px solid rgba(0, 122, 255, 0.15);
-            border-radius: 16px;
-            padding: 16px 18px;
-            margin-bottom: 12px;
-        }
-
-        .scan-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .scan-stat {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 10px 12px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-        }
-
         .lookup-card {
             background: linear-gradient(135deg, rgba(52, 199, 89, 0.08), rgba(52, 199, 89, 0.02));
             border: 1px solid rgba(52, 199, 89, 0.15);
@@ -471,18 +391,6 @@
             }
         }
 
-        @keyframes pulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.15);
-            }
-        }
-
         .fade-in {
             animation: fadeSlide 0.3s ease;
         }
@@ -527,9 +435,40 @@
             <button class="tab" data-tab="rules" onclick="R.setTab('rules')">📖 Rules</button>
         </div>
 
-        <!-- LOG TAB -->
+        <!-- LOG TAB (Static DOM structure so inputs aren't destroyed on type) -->
         <div id="tab-log">
-            <div class="card" id="log-card"></div>
+            <div class="card">
+                <div class="section-label" style="padding-top:4px;">Log a Run</div>
+                
+                <div style="position:relative; margin-bottom:16px;">
+                    <label style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Distance (Required)</label>
+                    <input type="number" inputmode="decimal" id="manual-dist" placeholder="0.0" step="0.1" min="0" class="big-input" oninput="R.updateLogPreview()" onkeydown="if(event.key==='Enter')R.manualLog()">
+                    <span class="input-unit">km</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <div>
+                        <label style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Duration</label>
+                        <input type="text" id="manual-duration" placeholder="e.g. 45:00" class="text-input">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Avg Pace</label>
+                        <input type="text" id="manual-pace" placeholder="e.g. 5'30&quot;" class="text-input">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Calories</label>
+                        <input type="number" inputmode="numeric" id="manual-calories" placeholder="e.g. 500" class="text-input" style="margin-bottom:0;">
+                    </div>
+                </div>
+
+                <button class="toggle" id="btn-tough" onclick="R.toggleTough()" style="background:var(--elevated);color:var(--sub)">
+                    💪 Tough conditions
+                </button>
+
+                <div id="log-preview-container"></div>
+
+                <button class="btn btn-accent" id="btn-submit-run" style="margin-top:14px; opacity:0.4" onclick="R.manualLog()" disabled>Log Run</button>
+            </div>
         </div>
 
         <!-- SHOP TAB -->
@@ -543,7 +482,6 @@
     </div>
 
     <div id="toast-el" class="toast hidden"></div>
-    <input type="file" id="file-input" accept="image/*" style="display:none">
 
     <script>
         // ─── Point System Logic ───
@@ -569,29 +507,7 @@
         function ptsForPrice(yen) { return Math.ceil(yen / 100) * 10; }
         function fmtDate(d) { return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" }); }
 
-        // ─── Claude API helpers ───
-        async function apiParseScreenshot(b64, mime) {
-            try {
-                const res = await fetch("https://api.anthropic.com/v1/messages", {
-                    method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        model: "claude-sonnet-4-20250514", max_tokens: 1000,
-                        messages: [{
-                            role: "user", content: [
-                                { type: "image", source: { type: "base64", media_type: mime, data: b64 } },
-                                {
-                                    type: "text", text: `Analyze this running app screenshot (Nike Run Club, Strava, etc).
-Return ONLY JSON, no markdown: {"distance_km":<number in km>,"duration":"<string>","avg_pace":"<or null>","calories":<or null>,"source":"<app name>"}\nConvert miles to km if needed. If unreadable: {"error":"Could not read"}`}
-                            ]
-                        }]
-                    })
-                });
-                const d = await res.json();
-                const txt = d.content?.map(b => b.text || "").join("") || "";
-                return JSON.parse(txt.replace(/```json|```/g, "").trim());
-            } catch (e) { return { error: "Failed to analyze" }; }
-        }
-
+        // ─── Claude API helpers (Kept for Shop lookup) ───
         async function apiLookupPrice(url) {
             try {
                 const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -612,22 +528,41 @@ Return ONLY JSON, no markdown: {"distance_km":<number in km>,"duration":"<string
         const R = {
             data: { runs: [], redeemed: [], wishlist: [], prizes: [] },
             tab: "log",
-            scanning: false,
-            scanData: null,
             isTough: false,
             lookingUp: false,
             lookupResult: null,
             toastTimer: null,
 
-            // Storage
+            // ─── Storage (Cloud Synced) ───
+            apiUrl: "https://script.google.com/macros/s/AKfycbzK8FYHOULQin4ugx879EhPQGnMb2dLQD_hqiHFxhPP6PQ8_-pt34fSIthMaUax2TqK/exec",
+
             async load() {
                 try {
+                    const res = await fetch(this.apiUrl);
+                    const cloudData = await res.json();
+                    if (cloudData && cloudData.runs) {
+                        this.data = cloudData;
+                    }
+                } catch (e) {
+                    console.error("Failed to load from cloud, trying local backup...", e);
                     const s = localStorage.getItem("runrewards-v5");
                     if (s) this.data = JSON.parse(s);
-                } catch (e) { }
+                }
                 this.render();
             },
-            save() { localStorage.setItem("runrewards-v5", JSON.stringify(this.data)); },
+
+            async save() {
+                localStorage.setItem("runrewards-v5", JSON.stringify(this.data));
+                try {
+                    fetch(this.apiUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify(this.data)
+                    });
+                } catch (e) {
+                    console.error("Failed to sync to cloud", e);
+                }
+            },
 
             // Derived
             get balance() { return this.data.runs.reduce((s, r) => s + r.points, 0) - this.data.redeemed.reduce((s, r) => s + r.cost, 0); },
@@ -661,50 +596,86 @@ Return ONLY JSON, no markdown: {"distance_km":<number in km>,"duration":"<string
                     id: Date.now(), date: new Date().toISOString(), distance: dist,
                     points: pts.total, isTough: tough, isNewRecord: dist > this.pr, breakdown: pts, ...extra
                 });
-                this.isTough = false; this.scanData = null; this.scanning = false;
-                this.save(); this.render();
+                this.isTough = false;
+                this.save(); 
+                this.render();
                 this.toast(`🎉 +${pts.total} points earned!`);
             },
 
             manualLog() {
-                const el = document.getElementById("manual-dist");
-                const d = parseFloat(el?.value); if (!d || d <= 0) return;
-                this.logRun(d, this.isTough);
-                el.value = "";
+                const distEl = document.getElementById("manual-dist");
+                const durEl = document.getElementById("manual-duration");
+                const paceEl = document.getElementById("manual-pace");
+                const calEl = document.getElementById("manual-calories");
+
+                const d = parseFloat(distEl.value); 
+                if (!d || d <= 0) return;
+
+                const extra = { source: "Manual" };
+                if (durEl.value.trim()) extra.duration = durEl.value.trim();
+                if (paceEl.value.trim()) extra.avgPace = paceEl.value.trim();
+                if (calEl.value.trim()) extra.calories = parseInt(calEl.value.trim()) || 0;
+
+                this.logRun(d, this.isTough, extra);
+
+                // Clear fields
+                distEl.value = "";
+                durEl.value = "";
+                paceEl.value = "";
+                calEl.value = "";
+                this.updateLogPreview(); // Reset the UI
             },
 
             toggleTough() {
                 this.isTough = !this.isTough;
-                this.render();
+                this.updateLogPreview();
             },
 
-            // Screenshot
-            async handleFile(file) {
-                if (!file) return;
-                this.scanning = true; this.scanData = null; this.render();
-                try {
-                    const b64 = await new Promise((res, rej) => {
-                        const r = new FileReader(); r.onload = () => res(r.result.split(",")[1]); r.onerror = rej; r.readAsDataURL(file);
-                    });
-                    const result = await apiParseScreenshot(b64, file.type || "image/jpeg");
-                    if (result.error) { this.toast("⚠️ " + result.error); this.scanning = false; this.render(); return; }
-                    if (!result.distance_km || result.distance_km <= 0) { this.toast("⚠️ No distance found"); this.scanning = false; this.render(); return; }
-                    result.distance_km = Math.round(result.distance_km * 100) / 100;
-                    this.scanData = result;
-                } catch (e) { this.toast("⚠️ Failed to read screenshot"); }
-                this.scanning = false; this.render();
+            // Updates the Log tab without destroying DOM elements
+            updateLogPreview() {
+                const distStr = document.getElementById("manual-dist")?.value;
+                const dist = parseFloat(distStr) || 0;
+                const previewEl = document.getElementById("log-preview-container");
+                const submitBtn = document.getElementById("btn-submit-run");
+                const toughBtn = document.getElementById("btn-tough");
+
+                // Update Tough toggle visuals
+                if (this.isTough) {
+                    toughBtn.style.background = "var(--accent)";
+                    toughBtn.style.color = "#fff";
+                    toughBtn.innerHTML = "💪 Tough conditions (1.2× active)";
+                } else {
+                    toughBtn.style.background = "var(--elevated)";
+                    toughBtn.style.color = "var(--sub)";
+                    toughBtn.innerHTML = "💪 Tough conditions";
+                }
+
+                if (dist > 0) {
+                    const prev = calcPoints(dist, this.isTough, this.pr, this.streakWeek);
+                    previewEl.innerHTML = this._previewHTML(prev);
+                    submitBtn.style.opacity = 1;
+                    submitBtn.disabled = false;
+                } else {
+                    previewEl.innerHTML = "";
+                    submitBtn.style.opacity = 0.4;
+                    submitBtn.disabled = true;
+                }
             },
 
-            confirmScan() {
-                if (!this.scanData) return;
-                const s = this.scanData, extra = {};
-                if (s.duration) extra.duration = s.duration;
-                if (s.avg_pace) extra.avgPace = s.avg_pace;
-                if (s.calories) extra.calories = s.calories;
-                if (s.source) extra.source = s.source;
-                this.logRun(s.distance_km, this.isTough, extra);
+            _previewHTML(p) {
+                const rows = [
+                    ["Base", p.base, true],
+                    ["Milestone", `+${p.milestone}`, p.milestone > 0],
+                    ["New Record!", `+${p.newTerritory}`, p.newTerritory > 0],
+                    ["Streak", `+${p.streakBonus}`, p.streakBonus > 0],
+                    ["Tough ×1.2", "applied", p.multiplier > 1],
+                ].filter(r => r[2]);
+                return `<div class="preview-box fade-in">
+                    <div style="font-size:12px;font-weight:600;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em">Point Preview</div>
+                    ${rows.map(([l, v]) => `<div class="preview-row"><span style="font-weight:500">${l}</span><span style="font-weight:600;color:var(--accent)">${v}</span></div>`).join("")}
+                    <div class="preview-total"><span style="font-weight:700">Total</span><span style="font-weight:800;color:var(--accent)">${p.total} pts</span></div>
+                </div>`;
             },
-            cancelScan() { this.scanData = null; this.scanning = false; this.render(); },
 
             // ─── Wishlist ───
             async handleLinkPaste() {
@@ -778,116 +749,44 @@ Return ONLY JSON, no markdown: {"distance_km":<number in km>,"duration":"<string
                 document.getElementById("streak-banner").innerHTML = sw >= 2
                     ? `<div class="streak-banner">🔥 Week ${sw} streak — +${streakBonus(sw)} bonus pts per run!</div>` : "";
 
-                // Render active tab
-                if (this.tab === "log") this.renderLog();
+                // Render active tab only
+                if (this.tab === "log") this.updateLogPreview(); // Updates log without breaking inputs
                 if (this.tab === "shop") this.renderShop();
                 if (this.tab === "history") this.renderHistory();
                 if (this.tab === "rules") this.renderRules();
             },
 
-            renderLog() {
-                const el = document.getElementById("log-card");
-                if (this.scanning) {
-                    el.innerHTML = `<div style="text-align:center;padding:40px 0" class="fade-in">
-                <div style="font-size:40px;margin-bottom:12px;animation:pulse 1.2s ease-in-out infinite">📸</div>
-                <div style="font-weight:700;font-size:16px">Analyzing screenshot...</div>
-                <div style="font-size:13px;color:var(--sub)">Reading your run data with AI</div>
-            </div>`;
-                    return;
-                }
-
-                if (this.scanData) {
-                    const s = this.scanData;
-                    const prev = calcPoints(s.distance_km, this.isTough, this.pr, this.streakWeek);
-                    el.innerHTML = `<div class="fade-in">
-                <div class="scan-card">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                        <span style="font-size:20px">📸</span>
-                        <div><div style="font-weight:700;font-size:15px">Screenshot Detected</div>
-                        <div style="font-size:12px;color:var(--sub)">from ${s.source || "running app"}</div></div>
-                    </div>
-                    <div class="scan-grid">
-                        ${[["📏", "Distance", `${s.distance_km?.toFixed(2)} km`], ["⏱️", "Duration", s.duration || "—"], ["🏃", "Avg Pace", s.avg_pace || "—"], ["🔥", "Calories", s.calories ? `${s.calories} kcal` : "—"]]
-                            .map(([i, l, v]) => `<div class="scan-stat"><div style="font-size:11px;color:var(--sub);font-weight:500;margin-bottom:2px">${i} ${l}</div><div style="font-size:16px;font-weight:700">${v}</div></div>`).join("")}
-                    </div>
-                </div>
-                <button class="toggle" onclick="R.toggleTough()" style="background:${this.isTough ? "var(--accent)" : "var(--elevated)"};color:${this.isTough ? "#fff" : "var(--sub)"}">
-                    💪 Tough conditions ${this.isTough ? "(1.2× active)" : ""}
-                </button>
-                ${this._previewHTML(prev)}
-                <div style="display:flex;gap:8px;margin-top:14px">
-                    <button class="btn btn-flat" style="flex:1;padding:14px;font-size:15px" onclick="R.cancelScan()">Cancel</button>
-                    <button class="btn btn-accent" style="flex:2;padding:14px;font-size:15px" onclick="R.confirmScan()">Log This Run</button>
-                </div>
-            </div>`;
-                    return;
-                }
-
-                // Default: upload + manual
-                const dist = parseFloat(document.getElementById("manual-dist")?.value) || 0;
-                const prev = dist > 0 ? calcPoints(dist, this.isTough, this.pr, this.streakWeek) : null;
-
-                el.innerHTML = `
-            <button class="upload-area" onclick="document.getElementById('file-input').click()">
-                <div style="font-size:36px;margin-bottom:8px">📸</div>
-                <div style="font-weight:700;font-size:16px;color:var(--text);margin-bottom:4px">Upload Screenshot</div>
-                <div style="font-size:13px;color:var(--sub)">Nike Run Club, Strava, or any running app</div>
-            </button>
-            <div class="divider"><div class="divider-line"></div><span class="divider-text">or enter manually</span><div class="divider-line"></div></div>
-            <div style="position:relative">
-                <input type="number" id="manual-dist" placeholder="0.0" step="0.1" min="0" class="big-input" oninput="R.render()" onkeydown="if(event.key==='Enter')R.manualLog()">
-                <span class="input-unit">km</span>
-            </div>
-            <button class="toggle" onclick="R.toggleTough()" style="background:${this.isTough ? "var(--accent)" : "var(--elevated)"};color:${this.isTough ? "#fff" : "var(--sub)"}">
-                💪 Tough conditions ${this.isTough ? "(1.2× active)" : ""}
-            </button>
-            ${prev ? this._previewHTML(prev) : ""}
-            <button class="btn btn-accent" style="margin-top:14px;opacity:${dist > 0 ? 1 : 0.4}" onclick="R.manualLog()" ${dist <= 0 ? "disabled" : ""}>Log Run</button>
-        `;
-            },
-
-            _previewHTML(p) {
-                const rows = [
-                    ["Base", p.base, true],
-                    ["Milestone", `+${p.milestone}`, p.milestone > 0],
-                    ["New Record!", `+${p.newTerritory}`, p.newTerritory > 0],
-                    ["Streak", `+${p.streakBonus}`, p.streakBonus > 0],
-                    ["Tough ×1.2", "applied", p.multiplier > 1],
-                ].filter(r => r[2]);
-                return `<div class="preview-box fade-in">
-            <div style="font-size:12px;font-weight:600;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em">Point Preview</div>
-            ${rows.map(([l, v]) => `<div class="preview-row"><span style="font-weight:500">${l}</span><span style="font-weight:600;color:var(--accent)">${v}</span></div>`).join("")}
-            <div class="preview-total"><span style="font-weight:700">Total</span><span style="font-weight:800;color:var(--accent)">${p.total} pts</span></div>
-        </div>`;
-            },
-
             renderShop() {
                 const el = document.getElementById("tab-shop");
                 const bal = this.balance;
-                let html = "";
+                
+                // Preserve link/price input values to prevent jumpiness if re-rendered during lookup
+                const currentLink = document.getElementById("link-input")?.value || "";
+                const currentPrice = document.getElementById("price-input")?.value || "";
 
+                let html = "";
                 // Add to wishlist form
                 html += `<div class="card">
-            <div class="card-title">Add to Wishlist</div>
-            <input type="text" id="link-input" placeholder="Paste a store link or product name..." class="text-input"
-                onpaste="setTimeout(()=>R.handleLinkPaste(),50)">
-            ${this.lookingUp ? `<div style="padding:12px 0;text-align:center" class="fade-in"><div style="font-size:13px;color:var(--sub);font-weight:600">🔍 Looking up price...</div></div>` : ""}
-            ${this.lookupResult && !this.lookupResult.error ? `
-                <div class="lookup-card fade-in">
-                    <div style="font-weight:700;font-size:14px;margin-bottom:4px">✅ ${this.lookupResult.product_name}</div>
-                    <div style="display:flex;justify-content:space-between;align-items:center">
-                        <span style="font-size:13px;color:var(--sub)">${this.lookupResult.store || "Online"}</span>
-                        <span style="font-weight:800;font-size:16px">${this.lookupResult.price_display}</span>
+                    <div class="card-title">Add to Wishlist</div>
+                    <input type="text" id="link-input" placeholder="Paste a store link or product name..." class="text-input"
+                        onpaste="setTimeout(()=>R.handleLinkPaste(),50)" value="${currentLink}">
+                    ${this.lookingUp ? `<div style="padding:12px 0;text-align:center" class="fade-in"><div style="font-size:13px;color:var(--sub);font-weight:600">🔍 Looking up price...</div></div>` : ""}
+                    ${this.lookupResult && !this.lookupResult.error ? `
+                        <div class="lookup-card fade-in">
+                            <div style="font-weight:700;font-size:14px;margin-bottom:4px">✅ ${this.lookupResult.product_name}</div>
+                            <div style="display:flex;justify-content:space-between;align-items:center">
+                                <span style="font-size:13px;color:var(--sub)">${this.lookupResult.store || "Online"}</span>
+                                <span style="font-weight:800;font-size:16px">${this.lookupResult.price_display}</span>
+                            </div>
+                            <div style="font-size:12px;color:var(--accent);font-weight:600;margin-top:6px">= ${ptsForPrice(this.lookupResult.price_jpy)} points to unlock</div>
+                        </div>` : ""}
+                    ${this.lookupResult?.error ? `<div style="font-size:13px;color:var(--sub);padding:8px 0;margin-bottom:4px">⚠️ Couldn't auto-detect price — enter manually${this.lookupResult.product_name ? ` (${this.lookupResult.product_name})` : ""}</div>` : ""}
+                    <div style="position:relative">
+                        <input type="number" id="price-input" placeholder="Price in ¥" class="text-input" style="padding-left:32px" value="${currentPrice}">
+                        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;font-weight:700;color:var(--sub)">¥</span>
                     </div>
-                    <div style="font-size:12px;color:var(--accent);font-weight:600;margin-top:6px">= ${ptsForPrice(this.lookupResult.price_jpy)} points to unlock</div>
-                </div>` : ""}
-            ${this.lookupResult?.error ? `<div style="font-size:13px;color:var(--sub);padding:8px 0;margin-bottom:4px">⚠️ Couldn't auto-detect price — enter manually${this.lookupResult.product_name ? ` (${this.lookupResult.product_name})` : ""}</div>` : ""}
-            <div style="position:relative">
-                <input type="number" id="price-input" placeholder="Price in ¥" class="text-input" style="padding-left:32px">
-                <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;font-weight:700;color:var(--sub)">¥</span>
-            </div>
-            <button class="btn btn-accent" onclick="R.addToWishlist()">Add to Wishlist</button>
-        </div>`;
+                    <button class="btn btn-accent" onclick="R.addToWishlist()">Add to Wishlist</button>
+                </div>`;
 
                 // Active prizes
                 if (this.data.prizes.length) {
@@ -896,19 +795,19 @@ Return ONLY JSON, no markdown: {"distance_km":<number in km>,"duration":"<string
                         const can = bal >= p.pointCost;
                         const prog = Math.min(100, (bal / p.pointCost) * 100);
                         html += `<div class="card" style="margin-bottom:8px">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-                        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px;margin-bottom:2px">${p.name}</div>
-                        <div style="font-size:12px;color:var(--sub)">${p.store ? p.store + " · " : ""}¥${p.price.toLocaleString()}</div></div>
-                        <div style="text-align:right;flex-shrink:0;margin-left:12px"><div style="font-weight:800;font-size:18px">${p.pointCost}</div><div style="font-size:11px;color:var(--sub)">pts</div></div>
-                    </div>
-                    <div class="progress-track"><div class="progress-fill" style="width:${prog}%;background:${can ? "var(--green)" : "var(--accent)"}"></div></div>
-                    <div style="display:flex;gap:8px">
-                        <button class="btn-sm" style="background:var(--elevated);color:var(--sub)" onclick="R.deletePrize(${p.id})">Remove</button>
-                        <button class="btn-sm" style="flex:2;background:${can ? "var(--green)" : "var(--elevated)"};color:${can ? "#fff" : "var(--sub)"};opacity:${can ? 1 : 0.5}" onclick="R.redeemPrize(${p.id})" ${can ? "" : "disabled"}>
-                            ${can ? "🎉 Redeem!" : `Need ${p.pointCost - bal} more`}
-                        </button>
-                    </div>
-                </div>`;
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+                                <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px;margin-bottom:2px">${p.name}</div>
+                                <div style="font-size:12px;color:var(--sub)">${p.store ? p.store + " · " : ""}¥${p.price.toLocaleString()}</div></div>
+                                <div style="text-align:right;flex-shrink:0;margin-left:12px"><div style="font-weight:800;font-size:18px">${p.pointCost}</div><div style="font-size:11px;color:var(--sub)">pts</div></div>
+                            </div>
+                            <div class="progress-track"><div class="progress-fill" style="width:${prog}%;background:${can ? "var(--green)" : "var(--accent)"}"></div></div>
+                            <div style="display:flex;gap:8px">
+                                <button class="btn-sm" style="background:var(--elevated);color:var(--sub)" onclick="R.deletePrize(${p.id})">Remove</button>
+                                <button class="btn-sm" style="flex:2;background:${can ? "var(--green)" : "var(--elevated)"};color:${can ? "#fff" : "var(--sub)"};opacity:${can ? 1 : 0.5}" onclick="R.redeemPrize(${p.id})" ${can ? "" : "disabled"}>
+                                    ${can ? "🎉 Redeem!" : `Need ${p.pointCost - bal} more`}
+                                </button>
+                            </div>
+                        </div>`;
                     });
                 }
 
@@ -922,13 +821,13 @@ Return ONLY JSON, no markdown: {"distance_km":<number in km>,"duration":"<string
                 ].forEach(r => {
                     const prog = Math.min(100, (bal / r.c) * 100);
                     html += `<div class="card" style="margin-bottom:8px">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-                    <div style="display:flex;align-items:center;gap:10px"><span style="font-size:26px">${r.e}</span>
-                    <div><div style="font-weight:700;font-size:15px">${r.t}</div><div style="font-size:12px;color:var(--sub);margin-top:2px">${r.x}</div></div></div>
-                    <div style="text-align:right;flex-shrink:0;margin-left:12px"><div style="font-weight:800;font-size:18px">${r.c}</div><div style="font-size:11px;color:var(--sub)">pts</div></div>
-                </div>
-                <div class="progress-track"><div class="progress-fill" style="width:${prog}%;background:${bal >= r.c ? "var(--accent)" : r.cl}"></div></div>
-            </div>`;
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:26px">${r.e}</span>
+                            <div><div style="font-weight:700;font-size:15px">${r.t}</div><div style="font-size:12px;color:var(--sub);margin-top:2px">${r.x}</div></div></div>
+                            <div style="text-align:right;flex-shrink:0;margin-left:12px"><div style="font-weight:800;font-size:18px">${r.c}</div><div style="font-size:11px;color:var(--sub)">pts</div></div>
+                        </div>
+                        <div class="progress-track"><div class="progress-fill" style="width:${prog}%;background:${bal >= r.c ? "var(--accent)" : r.cl}"></div></div>
+                    </div>`;
                 });
 
                 // Wishlist
@@ -936,14 +835,14 @@ Return ONLY JSON, no markdown: {"distance_km":<number in km>,"duration":"<string
                     html += `<div class="section-label">📌 Wishlist</div>`;
                     this.data.wishlist.forEach(w => {
                         html += `<div class="card wishlist-item" style="margin-bottom:8px">
-                    <div style="margin-bottom:8px"><div style="font-weight:700;font-size:14px">${w.name}</div>
-                    <div style="font-size:12px;color:var(--sub);margin-top:2px">¥${w.price.toLocaleString()} → <strong style="color:var(--accent)">${w.pointCost} pts</strong></div></div>
-                    <div style="display:flex;gap:8px">
-                        ${w.url ? `<a href="${w.url}" target="_blank" class="btn-sm" style="text-decoration:none;text-align:center;background:var(--elevated);color:var(--accent);font-size:12px">View</a>` : ""}
-                        <button class="btn-sm" style="background:var(--elevated);color:var(--red)" onclick="R.deleteWishlist(${w.id})">✕</button>
-                        <button class="btn-sm" style="flex:2;background:var(--accent);color:#fff" onclick="R.moveToPrizes(${w.id})">Move to Prizes →</button>
-                    </div>
-                </div>`;
+                            <div style="margin-bottom:8px"><div style="font-weight:700;font-size:14px">${w.name}</div>
+                            <div style="font-size:12px;color:var(--sub);margin-top:2px">¥${w.price.toLocaleString()} → <strong style="color:var(--accent)">${w.pointCost} pts</strong></div></div>
+                            <div style="display:flex;gap:8px">
+                                ${w.url ? `<a href="${w.url}" target="_blank" class="btn-sm" style="text-decoration:none;text-align:center;background:var(--elevated);color:var(--accent);font-size:12px">View</a>` : ""}
+                                <button class="btn-sm" style="background:var(--elevated);color:var(--red)" onclick="R.deleteWishlist(${w.id})">✕</button>
+                                <button class="btn-sm" style="flex:2;background:var(--accent);color:#fff" onclick="R.moveToPrizes(${w.id})">Move to Prizes →</button>
+                            </div>
+                        </div>`;
                     });
                 }
                 el.innerHTML = html;
@@ -956,66 +855,68 @@ Return ONLY JSON, no markdown: {"distance_km":<number in km>,"duration":"<string
                     html += `<div class="section-label">Redeemed</div>`;
                     this.data.redeemed.forEach(r => {
                         html += `<div class="history-row" style="border-left:3px solid var(--red)">
-                    <span style="font-size:20px">🎁</span>
-                    <div style="flex:1"><div style="font-weight:600;font-size:14px">${r.name || r.tier}</div><div style="font-size:12px;color:var(--sub)">${fmtDate(r.date)}</div></div>
-                    <span style="font-weight:700;color:var(--red);font-size:14px">−${r.cost}</span>
-                </div>`;
+                            <span style="font-size:20px">🎁</span>
+                            <div style="flex:1"><div style="font-weight:600;font-size:14px">${r.name || r.tier}</div><div style="font-size:12px;color:var(--sub)">${fmtDate(r.date)}</div></div>
+                            <span style="font-weight:700;color:var(--red);font-size:14px">−${r.cost}</span>
+                        </div>`;
                     });
                 }
                 html += `<div class="section-label">Runs</div>`;
                 if (!this.data.runs.length) html += `<div class="card" style="text-align:center;color:var(--sub);padding:32px">No runs yet. Get out there! 🏃</div>`;
                 this.data.runs.forEach(r => {
-                    const icon = r.source ? "📸" : r.isNewRecord ? "🏅" : "🏃";
+                    const icon = r.isNewRecord ? "🏅" : "🏃";
                     const bg = r.isNewRecord ? "linear-gradient(135deg,#f0c548,#e8a735)" : "var(--elevated)";
                     html += `<div class="history-row">
-                <div style="width:40px;height:40px;border-ra<button onclick="R.reset()dius:12px;display:flex;align-items:center;justify-content:center;background:${bg};font-size:18px;flex-shrink:0">${icon}</div>
-                <div style="flex:1;min-width:0">
-                    <div style="font-weight:600;font-size:14px">${r.distance} km${r.isTough ? ` <span style="font-size:11px;color:var(--accent);margin-left:6px">💪 1.2×</span>` : ""}${r.isNewRecord ? ` <span style="font-size:11px;color:#e8a735;margin-left:6px">NEW PR</span>` : ""}</div>
-                    <div style="font-size:12px;color:var(--sub)">${fmtDate(r.date)}${r.duration ? " · " + r.duration : ""}${r.avgPace ? " · " + r.avgPace : ""}${r.source ? " · " + r.source : ""}</div>
-                </div>
-                <div style="text-align:right;flex-shrink:0">
-                    <div style="font-weight:700;color:var(--accent);font-size:14px">+${r.points}</div>
-                    <button onclick="R.deleteRun(${r.id})" style="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;opacity:0.5">✕</button>
-                </div>
-            </div>`;
+                        <div style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:${bg};font-size:18px;flex-shrink:0">${icon}</div>
+                        <div style="flex:1;min-width:0">
+                            <div style="font-weight:600;font-size:14px">${r.distance} km${r.isTough ? ` <span style="font-size:11px;color:var(--accent);margin-left:6px">💪 1.2×</span>` : ""}${r.isNewRecord ? ` <span style="font-size:11px;color:#e8a735;margin-left:6px">NEW PR</span>` : ""}</div>
+                            <div style="font-size:12px;color:var(--sub)">
+                                ${fmtDate(r.date)}
+                                ${r.duration ? " · " + r.duration : ""}
+                                ${r.avgPace ? " · " + r.avgPace : ""}
+                                ${r.calories ? " · " + r.calories + " kcal" : ""}
+                            </div>
+                        </div>
+                        <div style="text-align:right;flex-shrink:0">
+                            <div style="font-weight:700;color:var(--accent);font-size:14px">+${r.points}</div>
+                            <button onclick="R.deleteRun(${r.id})" style="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;opacity:0.5">✕</button>
+                        </div>
+                    </div>`;
                 });
                 el.innerHTML = html;
             },
 
             renderRules() {
                 document.getElementById("tab-rules").innerHTML = `
-        <div class="card"><div class="card-title">1. Base Points</div>
-            <div class="rule-text"><strong>10 pts</strong> per km — your 2.5km run = 25 pts.</div>
-            <div class="rule-text" style="margin-top:8px"><strong>+10 pts</strong> "New Territory" bonus when you beat your PR.</div>
-            <div class="rule-text" style="margin-top:8px"><strong>×1.2</strong> multiplier for tough conditions (early AM, rain, long day).</div>
-        </div>
-        <div class="card"><div class="card-title">2. Milestone Bonuses</div>
-            ${[["5.0 km", "+15 pts", "= 65 total"], ["7.5 km", "+25 pts", "= 100 total"], ["10.0 km", "+40 pts", "= 140 total"]].map(([d, b, t], i) => `
-                <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;${i < 2 ? "border-bottom:1px solid var(--border)" : ""}">
-                    <span style="font-weight:600;flex:1">${d}</span><span style="color:var(--accent);font-weight:700;flex:1;text-align:center">${b}</span><span style="color:var(--sub);font-size:12px;flex:1;text-align:right">${t}</span>
-                </div>`).join("")}
-        </div>
-        <div class="card"><div class="card-title">3. Streak System</div>
-            <div class="rule-text" style="margin-bottom:10px">Run 2+ times per week to build your streak.</div>
-            ${[["Week 1", "Base only"], ["Week 2", "+5 per run"], ["Week 3", "+10 per run"], ["Week 4", "+15 per run"], ["Week 5+", "+20 per run (cap)"]].map(([w, b], i) => `
-                <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;${i < 4 ? "border-bottom:1px solid var(--border)" : ""}">
-                    <span style="font-weight:600">${w}</span><span style="color:var(--sub);font-weight:500">${b}</span>
-                </div>`).join("")}
-            <div class="rule-warn">⚠️ Fewer than 2 runs in a week → streak resets!</div>
-        </div>
-        <div class="card"><div class="card-title">4. Smart Wishlist</div>
-            <div class="rule-text">Paste any store link → AI auto-detects the price.</div>
-            <div class="rule-text" style="margin-top:4px">Conversion rate: <strong>¥100 = 10 points</strong>.</div>
-            <div class="rule-text" style="margin-top:4px">Move wishlist items to Prizes to make them redeemable.</div>
-            <div class="rule-text" style="margin-top:4px;font-weight:600">No debt — you must have the points to redeem.</div>
-        </div>`;
+                    <div class="card"><div class="card-title">1. Base Points</div>
+                        <div class="rule-text"><strong>10 pts</strong> per km — your 2.5km run = 25 pts.</div>
+                        <div class="rule-text" style="margin-top:8px"><strong>+10 pts</strong> "New Territory" bonus when you beat your PR.</div>
+                        <div class="rule-text" style="margin-top:8px"><strong>×1.2</strong> multiplier for tough conditions (early AM, rain, long day).</div>
+                    </div>
+                    <div class="card"><div class="card-title">2. Milestone Bonuses</div>
+                        ${[["5.0 km", "+15 pts", "= 65 total"], ["7.5 km", "+25 pts", "= 100 total"], ["10.0 km", "+40 pts", "= 140 total"]].map(([d, b, t], i) => `
+                            <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;${i < 2 ? "border-bottom:1px solid var(--border)" : ""}">
+                                <span style="font-weight:600;flex:1">${d}</span><span style="color:var(--accent);font-weight:700;flex:1;text-align:center">${b}</span><span style="color:var(--sub);font-size:12px;flex:1;text-align:right">${t}</span>
+                            </div>`).join("")}
+                    </div>
+                    <div class="card"><div class="card-title">3. Streak System</div>
+                        <div class="rule-text" style="margin-bottom:10px">Run 2+ times per week to build your streak.</div>
+                        ${[["Week 1", "Base only"], ["Week 2", "+5 per run"], ["Week 3", "+10 per run"], ["Week 4", "+15 per run"], ["Week 5+", "+20 per run (cap)"]].map(([w, b], i) => `
+                            <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;${i < 4 ? "border-bottom:1px solid var(--border)" : ""}">
+                                <span style="font-weight:600">${w}</span><span style="color:var(--sub);font-weight:500">${b}</span>
+                            </div>`).join("")}
+                        <div class="rule-warn">⚠️ Fewer than 2 runs in a week → streak resets!</div>
+                    </div>
+                    <div class="card"><div class="card-title">4. Smart Wishlist</div>
+                        <div class="rule-text">Paste any store link → AI auto-detects the price.</div>
+                        <div class="rule-text" style="margin-top:4px">Conversion rate: <strong>¥100 = 10 points</strong>.</div>
+                        <div class="rule-text" style="margin-top:4px">Move wishlist items to Prizes to make them redeemable.</div>
+                        <div class="rule-text" style="margin-top:4px;font-weight:600">No debt — you must have the points to redeem.</div>
+                    </div>`;
             }
         };
 
         // Init
-        document.getElementById("file-input").addEventListener("change", e => {
-            R.handleFile(e.target.files?.[0]); e.target.value = "";
-        });
         R.load();
     </script>
 </body>
