@@ -142,7 +142,8 @@
         .text-input {
             width: 100%;
             padding: 12px 14px;
-            font-size: 16px; /* 16px prevents auto-zoom on iOS */
+            font-size: 16px;
+            /* 16px prevents auto-zoom on iOS */
             font-family: inherit;
             background: var(--elevated);
             border: none;
@@ -439,35 +440,103 @@
         <div id="tab-log">
             <div class="card">
                 <div class="section-label" style="padding-top:4px;">Log a Run</div>
-                
+
                 <div style="position:relative; margin-bottom:16px;">
-                    <label style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Distance (Required)</label>
-                    <input type="number" inputmode="decimal" id="manual-dist" placeholder="0.0" step="0.1" min="0" class="big-input" oninput="R.updateLogPreview()" onkeydown="if(event.key==='Enter')R.manualLog()">
+                    <label
+                        style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Distance
+                        (Required)</label>
+                    <input type="number" inputmode="decimal" id="manual-dist" placeholder="0.0" step="0.1" min="0"
+                        class="big-input" oninput="R.updateLogPreview()"
+                        onkeydown="if(event.key==='Enter')R.manualLog()">
                     <span class="input-unit">km</span>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                     <div>
-                        <label style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Duration</label>
-                        <input type="text" id="manual-duration" placeholder="e.g. 45:00" class="text-input">
+                        <label
+                            style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Duration</label>
+                        <input type="text" id="manual-duration" placeholder="e.g. 45:00" class="text-input"
+                            oninput="R.updateLogPreview()">
                     </div>
                     <div>
-                        <label style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Avg Pace</label>
-                        <input type="text" id="manual-pace" placeholder="e.g. 5'30&quot;" class="text-input">
+                        <label
+                            style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Avg
+                            Pace</label>
+                        <input type="text" id="manual-pace" placeholder="Auto-calculated" class="text-input"
+                            style="background:var(--bg); color:var(--sub);" readonly>
                     </div>
-                    <div style="grid-column: span 2;">
-                        <label style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Calories</label>
-                        <input type="number" inputmode="numeric" id="manual-calories" placeholder="e.g. 500" class="text-input" style="margin-bottom:0;">
+                    <div>
+                        <label
+                            style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Calories</label>
+                        <input type="number" inputmode="numeric" id="manual-calories" placeholder="kcal"
+                            class="text-input" style="margin-bottom:0;">
+                    </div>
+                    <div>
+                        <label
+                            style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Avg
+                            BPM</label>
+                        <input type="number" inputmode="numeric" id="manual-bpm" placeholder="bpm" class="text-input"
+                            style="margin-bottom:0;">
+                    </div>
+                    <div>
+                        <label
+                            style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Cadence</label>
+                        <input type="number" inputmode="numeric" id="manual-cadence" placeholder="spm"
+                            class="text-input" style="margin-bottom:0;">
+                    </div>
+                    <div>
+                        <label
+                            style="display:block; font-size:12px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Elevation</label>
+                        <input type="number" inputmode="numeric" id="manual-elevation" placeholder="m"
+                            class="text-input" style="margin-bottom:0;">
                     </div>
                 </div>
 
-                <button class="toggle" id="btn-tough" onclick="R.toggleTough()" style="background:var(--elevated);color:var(--sub)">
+                <button class="toggle" id="btn-tough" onclick="R.toggleTough()"
+                    style="background:var(--elevated);color:var(--sub)">
                     💪 Tough conditions
                 </button>
 
                 <div id="log-preview-container"></div>
 
-                <button class="btn btn-accent" id="btn-submit-run" style="margin-top:14px; opacity:0.4" onclick="R.manualLog()" disabled>Log Run</button>
+                <button class="btn btn-accent" id="btn-submit-run" style="margin-top:14px; opacity:0.4"
+                    onclick="R.manualLog()" disabled>Log Run</button>
+            </div>
+
+            <div class="card" style="margin-top: 12px;">
+                <div class="section-label" style="padding-top:4px;">
+                    Log Body Metrics
+                    <span
+                        style="text-transform:none; font-weight:600; color:var(--accent); float:right; font-size:11px;">🎯
+                        Targets: 50kg / 23%</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                    <div>
+                        <label
+                            style="display:block; font-size:11px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.02em;">Weight
+                            (体重)</label>
+                        <input type="number" inputmode="decimal" id="manual-weight" placeholder="kg" class="text-input"
+                            style="margin-bottom:0; padding:10px;" oninput="R.updateMetricsPreview()">
+                    </div>
+                    <div>
+                        <label
+                            style="display:block; font-size:11px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.02em;">Body
+                            Fat (体脂肪率)</label>
+                        <input type="number" inputmode="decimal" id="manual-fat" placeholder="%" class="text-input"
+                            style="margin-bottom:0; padding:10px;" oninput="R.updateMetricsPreview()">
+                    </div>
+                    <div>
+                        <label
+                            style="display:block; font-size:11px; font-weight:700; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.02em;">Muscle
+                            (筋肉量)</label>
+                        <input type="number" inputmode="decimal" id="manual-muscle" placeholder="kg" class="text-input"
+                            style="margin-bottom:0; padding:10px;" oninput="R.updateMetricsPreview()">
+                    </div>
+                </div>
+                <div id="metrics-preview-container"></div>
+                <button class="btn btn-accent" id="btn-submit-metrics"
+                    style="margin-top:14px; opacity:0.4; background:var(--green);" onclick="R.manualLogMetrics()"
+                    disabled>Log Metrics</button>
             </div>
         </div>
 
@@ -507,6 +576,24 @@
         function ptsForPrice(yen) { return Math.ceil(yen / 100) * 10; }
         function fmtDate(d) { return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" }); }
 
+        function calculatePace(distKm, durationStr) {
+            if (!distKm || distKm <= 0 || !durationStr) return "";
+            let parts = durationStr.split(':').map(Number);
+            let mins = 0;
+            if (parts.some(isNaN)) return "";
+            if (parts.length === 2) mins = parts[0] + parts[1] / 60;
+            else if (parts.length === 3) mins = parts[0] * 60 + parts[1] + parts[2] / 60;
+            else if (parts.length === 1) mins = parts[0];
+            else return "";
+            if (mins <= 0) return "";
+
+            let paceMins = mins / distKm;
+            let pM = Math.floor(paceMins);
+            let pS = Math.round((paceMins - pM) * 60);
+            if (pS === 60) { pM++; pS = 0; }
+            return `${pM}'${pS.toString().padStart(2, '0')}"`;
+        }
+
         // ─── Claude API helpers (Kept for Shop lookup) ───
         async function apiLookupPrice(url) {
             try {
@@ -526,7 +613,7 @@
 
         // ─── App State ───
         const R = {
-            data: { runs: [], redeemed: [], wishlist: [], prizes: [] },
+            data: { runs: [], redeemed: [], wishlist: [], prizes: [], metrics: [] },
             tab: "log",
             isTough: false,
             lookingUp: false,
@@ -548,6 +635,7 @@
                     const s = localStorage.getItem("runrewards-v5");
                     if (s) this.data = JSON.parse(s);
                 }
+                if (!this.data.metrics) this.data.metrics = [];
                 this.render();
             },
 
@@ -565,7 +653,12 @@
             },
 
             // Derived
-            get balance() { return this.data.runs.reduce((s, r) => s + r.points, 0) - this.data.redeemed.reduce((s, r) => s + r.cost, 0); },
+            get balance() {
+                const runPts = this.data.runs.reduce((s, r) => s + r.points, 0);
+                const metricPts = (this.data.metrics || []).reduce((s, m) => s + m.points, 0);
+                const spent = this.data.redeemed.reduce((s, r) => s + r.cost, 0);
+                return runPts + metricPts - spent;
+            },
             get pr() { return getPR(this.data.runs); },
             get streakWeek() { return calcStreakWeek(this.data.runs); },
             get totalKm() { return this.data.runs.reduce((s, r) => s + r.distance, 0); },
@@ -597,7 +690,7 @@
                     points: pts.total, isTough: tough, isNewRecord: dist > this.pr, breakdown: pts, ...extra
                 });
                 this.isTough = false;
-                this.save(); 
+                this.save();
                 this.render();
                 this.toast(`🎉 +${pts.total} points earned!`);
             },
@@ -607,14 +700,20 @@
                 const durEl = document.getElementById("manual-duration");
                 const paceEl = document.getElementById("manual-pace");
                 const calEl = document.getElementById("manual-calories");
+                const bpmEl = document.getElementById("manual-bpm");
+                const cadEl = document.getElementById("manual-cadence");
+                const elevEl = document.getElementById("manual-elevation");
 
-                const d = parseFloat(distEl.value); 
+                const d = parseFloat(distEl.value);
                 if (!d || d <= 0) return;
 
                 const extra = { source: "Manual" };
                 if (durEl.value.trim()) extra.duration = durEl.value.trim();
                 if (paceEl.value.trim()) extra.avgPace = paceEl.value.trim();
                 if (calEl.value.trim()) extra.calories = parseInt(calEl.value.trim()) || 0;
+                if (bpmEl.value.trim()) extra.bpm = parseInt(bpmEl.value.trim()) || 0;
+                if (cadEl.value.trim()) extra.cadence = parseInt(cadEl.value.trim()) || 0;
+                if (elevEl.value.trim()) extra.elevation = parseInt(elevEl.value.trim()) || 0;
 
                 this.logRun(d, this.isTough, extra);
 
@@ -623,6 +722,9 @@
                 durEl.value = "";
                 paceEl.value = "";
                 calEl.value = "";
+                bpmEl.value = "";
+                cadEl.value = "";
+                elevEl.value = "";
                 this.updateLogPreview(); // Reset the UI
             },
 
@@ -635,6 +737,14 @@
             updateLogPreview() {
                 const distStr = document.getElementById("manual-dist")?.value;
                 const dist = parseFloat(distStr) || 0;
+
+                // Auto-calculate pace
+                const durStr = document.getElementById("manual-duration")?.value;
+                const paceEl = document.getElementById("manual-pace");
+                if (paceEl) {
+                    paceEl.value = calculatePace(dist, durStr);
+                }
+
                 const previewEl = document.getElementById("log-preview-container");
                 const submitBtn = document.getElementById("btn-submit-run");
                 const toughBtn = document.getElementById("btn-tough");
@@ -675,6 +785,104 @@
                     ${rows.map(([l, v]) => `<div class="preview-row"><span style="font-weight:500">${l}</span><span style="font-weight:600;color:var(--accent)">${v}</span></div>`).join("")}
                     <div class="preview-total"><span style="font-weight:700">Total</span><span style="font-weight:800;color:var(--accent)">${p.total} pts</span></div>
                 </div>`;
+            },
+
+            // ─── Body Metrics Logging ───
+            updateMetricsPreview() {
+                const w = parseFloat(document.getElementById("manual-weight")?.value);
+                const btn = document.getElementById("btn-submit-metrics");
+                const prev = document.getElementById("metrics-preview-container");
+
+                if (w > 0) {
+                    let pts = 10;
+                    const f = parseFloat(document.getElementById("manual-fat")?.value);
+                    const m = parseFloat(document.getElementById("manual-muscle")?.value);
+                    if (f > 0) pts += 5;
+                    if (m > 0) pts += 5;
+
+                    // Calculate bonuses for getting closer to targets
+                    const lastM = this.data.metrics && this.data.metrics.length > 0 ? this.data.metrics[0] : null;
+                    let wBonus = 0, fBonus = 0;
+
+                    if (lastM && lastM.weight) {
+                        // Bonus if closer to 50kg, or maintaining perfectly at 50kg
+                        if (Math.abs(w - 50) < Math.abs(lastM.weight - 50) || (w === 50 && lastM.weight === 50)) wBonus = 15;
+                    }
+                    if (f > 0 && lastM && lastM.fat) {
+                        // Bonus if closer to 23%, or maintaining perfectly at 23%
+                        if (Math.abs(f - 23) < Math.abs(lastM.fat - 23) || (f === 23 && lastM.fat === 23)) fBonus = 15;
+                    }
+
+                    pts += wBonus + fBonus;
+
+                    prev.innerHTML = `<div class="preview-box fade-in" style="margin-top:12px; margin-bottom:12px;">
+                        <div style="font-size:12px;font-weight:600;color:var(--sub);margin-bottom:8px;text-transform:uppercase;">Point Preview</div>
+                        <div class="preview-row"><span style="font-weight:500">Log Weight</span><span style="font-weight:600;color:var(--green)">10</span></div>
+                        ${f > 0 ? `<div class="preview-row"><span style="font-weight:500">Log Body Fat</span><span style="font-weight:600;color:var(--green)">+5</span></div>` : ""}
+                        ${m > 0 ? `<div class="preview-row"><span style="font-weight:500">Log Muscle Mass</span><span style="font-weight:600;color:var(--green)">+5</span></div>` : ""}
+                        ${wBonus > 0 ? `<div class="preview-row"><span style="font-weight:500">🎯 Closer to 50kg!</span><span style="font-weight:600;color:#e8a735">+15</span></div>` : ""}
+                        ${fBonus > 0 ? `<div class="preview-row"><span style="font-weight:500">🎯 Closer to 23% BF!</span><span style="font-weight:600;color:#e8a735">+15</span></div>` : ""}
+                        <div class="preview-total"><span style="font-weight:700">Total</span><span style="font-weight:800;color:var(--green)">${pts} pts</span></div>
+                    </div>`;
+                    btn.style.opacity = 1;
+                    btn.disabled = false;
+                } else {
+                    prev.innerHTML = "";
+                    btn.style.opacity = 0.4;
+                    btn.disabled = true;
+                }
+            },
+
+            manualLogMetrics() {
+                const w = parseFloat(document.getElementById("manual-weight")?.value);
+                const f = parseFloat(document.getElementById("manual-fat")?.value);
+                const m = parseFloat(document.getElementById("manual-muscle")?.value);
+                if (!w || w <= 0) return;
+
+                let pts = 10;
+                if (f > 0) pts += 5;
+                if (m > 0) pts += 5;
+
+                // Calculate bonuses for getting closer to targets
+                const lastM = this.data.metrics && this.data.metrics.length > 0 ? this.data.metrics[0] : null;
+                let wBonus = 0, fBonus = 0;
+
+                if (lastM && lastM.weight) {
+                    if (Math.abs(w - 50) < Math.abs(lastM.weight - 50) || (w === 50 && lastM.weight === 50)) wBonus = 15;
+                }
+                if (f > 0 && lastM && lastM.fat) {
+                    if (Math.abs(f - 23) < Math.abs(lastM.fat - 23) || (f === 23 && lastM.fat === 23)) fBonus = 15;
+                }
+
+                pts += wBonus + fBonus;
+
+                this.data.metrics = this.data.metrics || [];
+                this.data.metrics.unshift({
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    weight: w,
+                    fat: f || null,
+                    muscle: m || null,
+                    points: pts,
+                    wBonus: wBonus,
+                    fBonus: fBonus
+                });
+
+                document.getElementById("manual-weight").value = "";
+                document.getElementById("manual-fat").value = "";
+                document.getElementById("manual-muscle").value = "";
+                this.updateMetricsPreview();
+
+                this.save();
+                this.render();
+                this.toast(`⚖️ +${pts} points earned for logging metrics!`);
+            },
+
+            deleteMetric(id) {
+                this.data.metrics = this.data.metrics.filter(m => m.id !== id);
+                this.save();
+                this.render();
+                this.toast("Metric log removed");
             },
 
             // ─── Wishlist ───
@@ -726,7 +934,7 @@
 
             reset() {
                 if (!confirm("Reset all data? This cannot be undone.")) return;
-                this.data = { runs: [], redeemed: [], wishlist: [], prizes: [] };
+                this.data = { runs: [], redeemed: [], wishlist: [], prizes: [], metrics: [] };
                 this.save(); this.render(); this.toast("All data cleared");
             },
 
@@ -750,7 +958,10 @@
                     ? `<div class="streak-banner">🔥 Week ${sw} streak — +${streakBonus(sw)} bonus pts per run!</div>` : "";
 
                 // Render active tab only
-                if (this.tab === "log") this.updateLogPreview(); // Updates log without breaking inputs
+                if (this.tab === "log") {
+                    this.updateLogPreview();
+                    this.updateMetricsPreview();
+                }
                 if (this.tab === "shop") this.renderShop();
                 if (this.tab === "history") this.renderHistory();
                 if (this.tab === "rules") this.renderRules();
@@ -759,7 +970,7 @@
             renderShop() {
                 const el = document.getElementById("tab-shop");
                 const bal = this.balance;
-                
+
                 // Preserve link/price input values to prevent jumpiness if re-rendered during lookup
                 const currentLink = document.getElementById("link-input")?.value || "";
                 const currentPrice = document.getElementById("price-input")?.value || "";
@@ -861,27 +1072,58 @@
                         </div>`;
                     });
                 }
-                html += `<div class="section-label">Runs</div>`;
-                if (!this.data.runs.length) html += `<div class="card" style="text-align:center;color:var(--sub);padding:32px">No runs yet. Get out there! 🏃</div>`;
-                this.data.runs.forEach(r => {
-                    const icon = r.isNewRecord ? "🏅" : "🏃";
-                    const bg = r.isNewRecord ? "linear-gradient(135deg,#f0c548,#e8a735)" : "var(--elevated)";
-                    html += `<div class="history-row">
-                        <div style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:${bg};font-size:18px;flex-shrink:0">${icon}</div>
-                        <div style="flex:1;min-width:0">
-                            <div style="font-weight:600;font-size:14px">${r.distance} km${r.isTough ? ` <span style="font-size:11px;color:var(--accent);margin-left:6px">💪 1.2×</span>` : ""}${r.isNewRecord ? ` <span style="font-size:11px;color:#e8a735;margin-left:6px">NEW PR</span>` : ""}</div>
-                            <div style="font-size:12px;color:var(--sub)">
-                                ${fmtDate(r.date)}
-                                ${r.duration ? " · " + r.duration : ""}
-                                ${r.avgPace ? " · " + r.avgPace : ""}
-                                ${r.calories ? " · " + r.calories + " kcal" : ""}
+
+                html += `<div class="section-label">History Logs</div>`;
+
+                // Combine and sort runs & metrics
+                const allItems = [
+                    ...this.data.runs.map(r => ({ ...r, type: 'run' })),
+                    ...(this.data.metrics || []).map(m => ({ ...m, type: 'metric' }))
+                ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                if (!allItems.length) html += `<div class="card" style="text-align:center;color:var(--sub);padding:32px">No history yet. Get out there! 🏃</div>`;
+
+                allItems.forEach(item => {
+                    if (item.type === 'run') {
+                        const icon = item.isNewRecord ? "🏅" : "🏃";
+                        const bg = item.isNewRecord ? "linear-gradient(135deg,#f0c548,#e8a735)" : "var(--elevated)";
+                        html += `<div class="history-row">
+                            <div style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:${bg};font-size:18px;flex-shrink:0">${icon}</div>
+                            <div style="flex:1;min-width:0">
+                                <div style="font-weight:600;font-size:14px">${item.distance} km${item.isTough ? ` <span style="font-size:11px;color:var(--accent);margin-left:6px">💪 1.2×</span>` : ""}${item.isNewRecord ? ` <span style="font-size:11px;color:#e8a735;margin-left:6px">NEW PR</span>` : ""}</div>
+                                <div style="font-size:12px;color:var(--sub)">
+                                    ${fmtDate(item.date)}
+                                    ${item.duration ? " · " + item.duration : ""}
+                                    ${item.avgPace ? " · " + item.avgPace : ""}
+                                    ${item.calories ? " · " + item.calories + " kcal" : ""}
+                                    ${item.bpm ? " · " + item.bpm + " bpm" : ""}
+                                    ${item.cadence ? " · " + item.cadence + " spm" : ""}
+                                    ${item.elevation ? " · " + item.elevation + "m" : ""}
+                                </div>
                             </div>
-                        </div>
-                        <div style="text-align:right;flex-shrink:0">
-                            <div style="font-weight:700;color:var(--accent);font-size:14px">+${r.points}</div>
-                            <button onclick="R.deleteRun(${r.id})" style="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;opacity:0.5">✕</button>
-                        </div>
-                    </div>`;
+                            <div style="text-align:right;flex-shrink:0">
+                                <div style="font-weight:700;color:var(--accent);font-size:14px">+${item.points}</div>
+                                <button onclick="R.deleteRun(${item.id})" style="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;opacity:0.5">✕</button>
+                            </div>
+                        </div>`;
+                    } else if (item.type === 'metric') {
+                        const bonusTag = (item.wBonus > 0 || item.fBonus > 0) ? ` <span style="font-size:11px;color:#e8a735;margin-left:6px">🎯 TARGET BONUS</span>` : "";
+                        html += `<div class="history-row">
+                            <div style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--elevated);font-size:18px;flex-shrink:0">⚖️</div>
+                            <div style="flex:1;min-width:0">
+                                <div style="font-weight:600;font-size:14px">${item.weight} kg${bonusTag}</div>
+                                <div style="font-size:12px;color:var(--sub)">
+                                    ${fmtDate(item.date)}
+                                    ${item.fat ? " · BF: " + item.fat + "%" : ""}
+                                    ${item.muscle ? " · Muscle: " + item.muscle + " kg" : ""}
+                                </div>
+                            </div>
+                            <div style="text-align:right;flex-shrink:0">
+                                <div style="font-weight:700;color:var(--green);font-size:14px">+${item.points}</div>
+                                <button onclick="R.deleteMetric(${item.id})" style="background:none;border:none;color:var(--sub);font-size:12px;cursor:pointer;opacity:0.5">✕</button>
+                            </div>
+                        </div>`;
+                    }
                 });
                 el.innerHTML = html;
             },
@@ -912,6 +1154,13 @@
                         <div class="rule-text" style="margin-top:4px">Conversion rate: <strong>¥100 = 10 points</strong>.</div>
                         <div class="rule-text" style="margin-top:4px">Move wishlist items to Prizes to make them redeemable.</div>
                         <div class="rule-text" style="margin-top:4px;font-weight:600">No debt — you must have the points to redeem.</div>
+                    </div>
+                    <div class="card"><div class="card-title">5. Body Metrics Tracking</div>
+                        <div class="rule-text"><strong>10 pts</strong> for logging your Weight.</div>
+                        <div class="rule-text" style="margin-top:8px"><strong>+5 pts</strong> for logging Body Fat / Muscle Mass.</div>
+                        <div class="rule-text" style="margin-top:12px;color:var(--accent);font-weight:600">🎯 Target Bonuses:</div>
+                        <div class="rule-text" style="margin-top:4px"><strong>+15 pts</strong> when you get closer to your target weight (<strong>50kg</strong>).</div>
+                        <div class="rule-text" style="margin-top:4px"><strong>+15 pts</strong> when you get closer to your target body fat (<strong>23%</strong>).</div>
                     </div>`;
             }
         };
