@@ -1023,9 +1023,12 @@
                     this.data.prizes.forEach(p => {
                         const can = bal >= p.pointCost;
                         const prog = Math.min(100, (bal / p.pointCost) * 100);
+                        const nameHtml = p.url
+                            ? `<a href="${p.url}" target="_blank" style="font-weight:700;font-size:15px;margin-bottom:2px;color:var(--accent);text-decoration:none;display:block">${p.name} ↗</a>`
+                            : `<div style="font-weight:700;font-size:15px;margin-bottom:2px">${p.name}</div>`;
                         html += `<div class="card" style="margin-bottom:8px">
                             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-                                <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px;margin-bottom:2px">${p.name}</div>
+                                <div style="flex:1;min-width:0">${nameHtml}
                                 <div style="font-size:12px;color:var(--sub)">${p.store ? p.store + " · " : ""}¥${p.price.toLocaleString()}</div></div>
                                 <div style="text-align:right;flex-shrink:0;margin-left:12px"><div style="font-weight:800;font-size:18px">${p.pointCost}</div><div style="font-size:11px;color:var(--sub)">pts</div></div>
                             </div>
@@ -1063,11 +1066,13 @@
                 if (this.data.wishlist.length) {
                     html += `<div class="section-label">📌 Wishlist</div>`;
                     this.data.wishlist.forEach(w => {
+                        const nameHtml = w.url
+                            ? `<a href="${w.url}" target="_blank" style="font-weight:700;font-size:14px;color:var(--accent);text-decoration:none">${w.name} ↗</a>`
+                            : `<div style="font-weight:700;font-size:14px">${w.name}</div>`;
                         html += `<div class="card wishlist-item" style="margin-bottom:8px">
-                            <div style="margin-bottom:8px"><div style="font-weight:700;font-size:14px">${w.name}</div>
+                            <div style="margin-bottom:8px">${nameHtml}
                             <div style="font-size:12px;color:var(--sub);margin-top:2px">¥${w.price.toLocaleString()} → <strong style="color:var(--accent)">${w.pointCost} pts</strong></div></div>
                             <div style="display:flex;gap:8px">
-                                ${w.url ? `<a href="${w.url}" target="_blank" class="btn-sm" style="text-decoration:none;text-align:center;background:var(--elevated);color:var(--accent);font-size:12px">View</a>` : ""}
                                 <button class="btn-sm" style="background:var(--elevated);color:var(--red)" onclick="R.deleteWishlist(${w.id})">✕</button>
                                 <button class="btn-sm" style="flex:2;background:var(--accent);color:#fff" onclick="R.moveToPrizes(${w.id})">Move to Prizes →</button>
                             </div>
