@@ -893,17 +893,25 @@
                 const result = await apiLookupPrice(url);
                 this.lookupResult = result;
                 if (result.price_jpy) { const el = document.getElementById("price-input"); if (el) el.value = result.price_jpy; }
+                if (result.product_name) {
+                    const nameEl = document.getElementById("name-input");
+                    if (nameEl && !nameEl.value.trim()) nameEl.value = result.product_name;
+                }
                 this.lookingUp = false; this.render();
             },
 
             addToWishlist() {
                 const price = parseInt(document.getElementById("price-input")?.value);
-                if (!price || price <= 0) { this.toast("⚠️ Enter a valid price"); return; }
+                const nameEl = document.getElementById("name-input");
                 const linkEl = document.getElementById("link-input");
-                const name = this.lookupResult?.product_name || linkEl?.value || "Custom item";
+                const manualName = nameEl?.value?.trim();
+                if (!price || price <= 0) { this.toast("⚠️ Enter a valid price"); return; }
+                if (!manualName && !this.lookupResult?.product_name) { this.toast("⚠️ Enter a product name"); return; }
+                const name = manualName || this.lookupResult?.product_name || "Custom item";
                 const store = this.lookupResult?.store || "";
                 const url = linkEl?.value?.match(/^https?:\/\//) ? linkEl.value : "";
                 this.data.wishlist.unshift({ id: Date.now(), name, price, pointCost: ptsForPrice(price), url, store, date: new Date().toISOString() });
+                if (nameEl) nameEl.value = "";
                 if (linkEl) linkEl.value = "";
                 const priceEl = document.getElementById("price-input"); if (priceEl) priceEl.value = "";
                 this.lookupResult = null;
@@ -974,29 +982,39 @@
                 // Preserve link/price input values to prevent jumpiness if re-rendered during lookup
                 const currentLink = document.getElementById("link-input")?.value || "";
                 const currentPrice = document.getElementById("price-input")?.value || "";
+                const currentName = document.getElementById("name-input")?.value || "";
 
                 let html = "";
                 // Add to wishlist form
+
                 html += `<div class="card">
                     <div class="card-title">Add to Wishlist</div>
-                    <input type="text" id="link-input" placeholder="Paste a store link or product name..." class="text-input"
-                        onpaste="setTimeout(()=>R.handleLinkPaste(),50)" value="${currentLink}">
-                    ${this.lookingUp ? `<div style="padding:12px 0;text-align:center" class="fade-in"><div style="font-size:13px;color:var(--sub);font-weight:600">🔍 Looking up price...</div></div>` : ""}
+                    <div style="margin-bottom:6px">
+                        <label style="display:block;font-size:11px;font-weight:700;color:var(--sub);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em">Product Name</label>
+                        <input type="text" id="name-input" placeholder="e.g. Nike Pegasus 41" class="text-input" style="margin-bottom:0" value="${currentName.replace(/"/g, '&quot;')}">
+                    </div>
+                    <div style="margin-bottom:6px">
+                        <label style="display:block;font-size:11px;font-weight:700;color:var(--sub);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em">Link <span style="text-transform:none;font-weight:500;opacity:0.6">(optional — auto-detects name & price)</span></label>
+                        <input type="text" id="link-input" placeholder="Paste a store URL..." class="text-input" style="margin-bottom:0"
+                            onpaste="setTimeout(()=>R.handleLinkPaste(),50)" value="${currentLink}">
+                    </div>
+                    ${this.lookingUp ? `<div style="padding:12px 0;text-align:center" class="fade-in"><div style="font-size:13px;color:var(--sub);font-weight:600">🔍 Looking up product...</div></div>` : ""}
                     ${this.lookupResult && !this.lookupResult.error ? `
                         <div class="lookup-card fade-in">
-                            <div style="font-weight:700;font-size:14px;margin-bottom:4px">✅ ${this.lookupResult.product_name}</div>
+                            <div style="font-weight:700;font-size:14px;margin-bottom:4px">✅ Auto-detected</div>
                             <div style="display:flex;justify-content:space-between;align-items:center">
                                 <span style="font-size:13px;color:var(--sub)">${this.lookupResult.store || "Online"}</span>
                                 <span style="font-weight:800;font-size:16px">${this.lookupResult.price_display}</span>
                             </div>
                             <div style="font-size:12px;color:var(--accent);font-weight:600;margin-top:6px">= ${ptsForPrice(this.lookupResult.price_jpy)} points to unlock</div>
                         </div>` : ""}
-                    ${this.lookupResult?.error ? `<div style="font-size:13px;color:var(--sub);padding:8px 0;margin-bottom:4px">⚠️ Couldn't auto-detect price — enter manually${this.lookupResult.product_name ? ` (${this.lookupResult.product_name})` : ""}</div>` : ""}
-                    <div style="position:relative">
-                        <input type="number" id="price-input" placeholder="Price in ¥" class="text-input" style="padding-left:32px" value="${currentPrice}">
-                        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;font-weight:700;color:var(--sub)">¥</span>
+                    ${this.lookupResult?.error ? `<div style="font-size:13px;color:var(--sub);padding:8px 0;margin-bottom:4px">⚠️ Couldn't auto-detect — enter name & price manually</div>` : ""}
+                    <div style="position:relative;margin-top:6px">
+                        <label style="display:block;font-size:11px;font-weight:700;color:var(--sub);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em">Price</label>
+                        <input type="number" id="price-input" placeholder="Price in ¥" class="text-input" style="padding-left:32px;margin-bottom:0" value="${currentPrice}">
+                        <span style="position:absolute;left:12px;bottom:12px;font-size:16px;font-weight:700;color:var(--sub)">¥</span>
                     </div>
-                    <button class="btn btn-accent" onclick="R.addToWishlist()">Add to Wishlist</button>
+                    <button class="btn btn-accent" style="margin-top:14px" onclick="R.addToWishlist()">Add to Wishlist</button>
                 </div>`;
 
                 // Active prizes
@@ -1150,7 +1168,7 @@
                         <div class="rule-warn">⚠️ Fewer than 2 runs in a week → streak resets!</div>
                     </div>
                     <div class="card"><div class="card-title">4. Smart Wishlist</div>
-                        <div class="rule-text">Paste any store link → AI auto-detects the price.</div>
+                        <div class="rule-text">Enter a product name, or paste a store link to auto-detect name & price.</div>
                         <div class="rule-text" style="margin-top:4px">Conversion rate: <strong>¥100 = 10 points</strong>.</div>
                         <div class="rule-text" style="margin-top:4px">Move wishlist items to Prizes to make them redeemable.</div>
                         <div class="rule-text" style="margin-top:4px;font-weight:600">No debt — you must have the points to redeem.</div>
